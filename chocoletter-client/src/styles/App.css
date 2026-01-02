@@ -1,0 +1,97 @@
+@import "textShadow.css";
+@import "animation.css";
+
+.App {
+  text-align: center;
+  /* height: calc(var(--vh, 1vh) * 100); */
+  min-height: 100vh;
+}
+
+.navHeight {
+  height: 3.5rem;
+}
+
+.fullHeight {
+  height: calc((var(--vh, 1vh) * 100) - 3.5rem);
+}
+
+.maxFullHeight {
+  max-height: calc((var(--vh, 1vh) * 100) - 3.5rem);
+  overflow: auto;
+}
+
+.manualHeight {
+  height: calc((var(--vh, 1vh) * 100) - 12rem);
+}
+
+.guideHeight {
+  height: calc((var(--vh, 1vh) * 100) - 16rem);
+}
+
+.writingHeight {
+  height: calc((var(--vh, 1vh) * 100) - 17.5rem);
+}
+
+.writingDetailHeight {
+  height: calc((var(--vh, 1vh) * 100) - 21rem);
+}
+
+.loadingHeight {
+  height: calc((var(--vh, 1vh) * 100) - 40rem);
+}
+
+/* body {
+  overflow: hidden;
+  touch-action: none;
+} */
+
+/* For Webkit-based browsers (Chrome, Safari and Opera) */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* For IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
+/* 기본 토스트 내부 스타일 (에러가 아닌 경우) */
+.mobile-toast-container .Toastify__toast {
+  background: rgba(0, 0, 0, 0.1);  /* 검은색 배경, 투명도 10% */
+  color: #fff;                     /* 흰색 텍스트 */
+  font-size: 14px;
+  padding: 12px;                   /* 내부 여백 */
+  border-radius: 20px;
+  font-family: "Dovemayo_gothic", sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  min-height: 0;
+  margin-top: 16px;
+  width: auto !important;
+  display: inline-flex !important; /* inline-flex로 변경 */
+  align-items: center;             /* 세로 가운데 정렬 */
+  justify-content: center;         /* 가로 가운데 정렬 */
+  text-align: center;
+}
+
+/* 토스트 본문 내부 여백 제거 */
+.mobile-toast-container .Toastify__toast-body {
+  padding: 18px 18px;
+}
+
+/* 닫기 버튼 제거 */
+.mobile-toast-container .Toastify__close-button {
+  display: none;
+}
+
+/* 에러 토스트 스타일 (toast.error 호출 시 적용) */
+.mobile-toast-container .Toastify__toast--error {
+  background: rgba(255, 0, 0, 0.1);  /* 빨간색 배경, 투명도 80% */
+  color: #fff;                     /* 흰색 텍스트 */
+}
+
+.onboarding-intro-container {
+  /* 내부 스크롤이 끝났을 때 바깥으로 스크롤 이벤트가 전파되지 않도록 설정 */
+  overscroll-behavior: contain;
+}

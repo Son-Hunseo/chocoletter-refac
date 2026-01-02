@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GOOGLE_ANALYTICS_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', '%VITE_GOOGLE_ANALYTICS_ID%');
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    <meta property="og:url" content="https://www.chocolate-letter.com">
+    <meta property="og:title" content="초코레터">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://www.chocolate-letter.com/chocoletter_kakao_logo2.png">
+    <meta property="og:description" content="공유된 링크로 들어와 편지를 작성해주세요!">
+    <title>초코레터</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

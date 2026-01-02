@@ -1,0 +1,5 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+    import: optional:file:prod.env[.properties]

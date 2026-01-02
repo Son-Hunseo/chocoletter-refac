@@ -1,0 +1,23 @@
+.chocoes {
+    display: flex;
+    width: 12rem;
+    height: 12rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 80px;
+    animation: bounce 1.2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(-10%);
+        animation-timing-function: cubic-bezier(1, 0, 0.8, 1.2);
+    }
+
+    50% {
+        transform: translateY(0);
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+}
