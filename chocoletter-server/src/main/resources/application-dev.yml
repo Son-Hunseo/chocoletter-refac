@@ -1,18 +1,18 @@
-# 쓰레드 풀
-server:
-  tomcat:
-    threads:
-      max: 200
-
 spring:
   config:
     activate:
       on-profile: dev
-    import: optional:file:dev.env[.properties]
+    import: optional:file:env/dev.env[.properties]
+
+  # DB
+  server:
+    tomcat:
+      threads:
+        max: 200 # 쓰레드 풀
 
   datasource:
-    driver-class-name: ${DB_DRIVER_CLASS_NAME}
-    url: jdbc:${DB_TYPE}://${DB_URL}:${DB_PORT}/${DB_SCHEMA}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_URL}:${DB_PORT}/${DB_SCHEMA}?useSSL=true&serverTimezone=Asia/Seoul&useUniCode=yes&characterEncoding=UTF-8
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
@@ -38,7 +38,7 @@ spring:
       client:
         registration:
           kakao:
-            client-id: ${KAKAO_CLIEND_ID}
+            client-id: ${KAKAO_CLIENT_ID}
             authorization-grant-type: authorization_code
             redirect-uri: ${KAKAO_REDIRECT_URI}
             scope: profile_nickname, profile_image
