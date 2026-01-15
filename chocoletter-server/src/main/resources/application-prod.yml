@@ -38,7 +38,7 @@ spring:
       client:
         registration:
           kakao:
-            client-id: ${KAKAO_CLIENT_ID}
+            client-id: ${KAKAO_CLIENT_ID_CHOCO}
             authorization-grant-type: authorization_code
             redirect-uri: ${KAKAO_REDIRECT_URI}
             scope: profile_nickname, profile_image
