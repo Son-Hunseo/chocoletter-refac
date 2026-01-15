@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chocoletter-client-deploy
+  namespace: chocoletter
+  labels:
+    app: chocoletter-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chocoletter-client
+  template:
+    metadata:
+      labels:
+        app: chocoletter-client
+    spec:
+      imagePullSecrets:
+        - name: ecr-registry-key
+      containers:
+        - name: chocoletter-client
+          image: 211125633965.dkr.ecr.ap-northeast-2.amazonaws.com/refac/chocoletter-client:0.0
+          ports:
+            - containerPort: 80

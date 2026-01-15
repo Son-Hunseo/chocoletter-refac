@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: chocoletter-route
+  namespace: chocoletter
+spec:
+  parentRefs:
+    - name: web-gateway
+      namespace: gateway # Gateway가 있는 ns
+      sectionName: http-chocoletter
+#    - name: web-gateway
+#      namespace: gateway # Gateway가 있는 ns
+#      sectionName: https-blog
+  hostnames:
+    - chocoletter.sonhs.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: chocoletter-client-service
+          port: 80

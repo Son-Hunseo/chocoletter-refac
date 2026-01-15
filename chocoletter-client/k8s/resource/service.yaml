@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chocoletter-client-service
+  namespace: chocoletter
+spec:
+  selector:
+    app: chocoletter-client
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
