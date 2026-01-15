@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: chocoletter-server-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: chocoletter-server
   ports:
