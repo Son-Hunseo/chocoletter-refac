@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: refac-chocoletter-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chocoletter-server
+  template:
+    metadata:
+      labels:
+        app: chocoletter-server
+    spec:
+      containers:
+        - name: chocoletter-server
+          image: chocoletter-server-image # 가상 이름, Overlay에서 변경
+          ports:
+            - containerPort: 8080
