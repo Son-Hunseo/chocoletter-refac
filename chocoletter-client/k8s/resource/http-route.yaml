@@ -8,9 +8,9 @@ spec:
     - name: web-gateway
       namespace: gateway # Gateway가 있는 ns
       sectionName: http-chocoletter
-#    - name: web-gateway
-#      namespace: gateway # Gateway가 있는 ns
-#      sectionName: https-blog
+    - name: web-gateway
+      namespace: gateway # Gateway가 있는 ns
+      sectionName: https-chocoletter
   hostnames:
     - chocoletter.sonhs.com
   rules:
