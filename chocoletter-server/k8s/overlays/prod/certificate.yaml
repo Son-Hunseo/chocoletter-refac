@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: chocoletter-server-sonhs-com
+  namespace: gateway # Gateway 네임스페이스
+spec:
+  secretName: chocoletter-server-sonhs-com-tls
+  issuerRef:
+    name: letsencrypt-http
+    kind: ClusterIssuer
+  dnsNames:
+    - chocoletter-server.sonhs.com

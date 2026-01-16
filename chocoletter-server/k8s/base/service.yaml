@@ -2,8 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: chocoletter-server-service
+  namespace: chocoletter
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: chocoletter-server
   ports:
