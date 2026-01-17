@@ -65,7 +65,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://chocoletter.sonhs.com",
-                "https://chocoletter-server.sonhs.com"
+                "https://chocoletter-server.sonhs.com",
+                "http://localhost:5173",
+                "http://localhost:8080"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
