@@ -45,9 +45,6 @@ import tutorial_icon from "../assets/images/main/tutorial_icon.svg";
 import chat_icon from "../assets/images/main/chat_icon.svg";
 import open_text2 from "../assets/images/main/open_text2.svg";
 import bell_icon from "../assets/images/main/bell_icon.svg";
-import calendar_icon from "../assets/images/main/calendar_icon.svg";
-
-import CalendarModal from "../components/main/my/before/modal/CalendarModal";
 import { countMyGiftBox, getGiftBoxName } from "../services/giftBoxApi";
 import { getAlarmCount } from "../services/alarmApi";
 import FirstLoginEventModal from "../components/main/your/before/modal/FirstLoginEventModal";
@@ -100,7 +97,6 @@ const MainMyEventView: React.FC = () => {
   // 튜토리얼 아이콘 ref
   const tutorialIconRef = useRef<HTMLButtonElement>(null);
   const watchOpenCountRef = useRef<HTMLDivElement>(null);
-  const calendarIconRef = useRef<HTMLButtonElement>(null);
   const chatIconRef = useRef<HTMLButtonElement>(null);
   const giftBoxRef = useRef<HTMLButtonElement>(null);
   const dummyRef = useRef<HTMLDivElement>(null);
@@ -110,8 +106,6 @@ const MainMyEventView: React.FC = () => {
 
   const [isChatModalOpen, setIsChatModalOpen] = useState(false); // 새로운 상태 추가
 
-  // (추가됨) 캘린더 모달
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   // 알림 개수 상태
   const [alarmCount, setAlarmCount] = useState<number>(0);
@@ -132,7 +126,6 @@ const MainMyEventView: React.FC = () => {
       tutorialIconRef,
       dummyRef,
       watchOpenCountRef,
-      calendarIconRef,
       dummyRef,
       chatIconRef,
       dummyRef,
@@ -151,10 +144,6 @@ const MainMyEventView: React.FC = () => {
     // toast.info("튜토리얼 아이콘 클릭!");
   };
 
-  // (추가됨) 캘린더 모달 열기
-  const handleCalendar = () => {
-    setIsCalendarModalOpen(true);
-  };
 
   const handleChat = () => {
     navigate("/chat/list");
@@ -267,9 +256,6 @@ const MainMyEventView: React.FC = () => {
               <button onClick={handleTutorial} ref={tutorialIconRef}>
                 <img src={tutorial_icon} className="w-6 h-6" />
               </button>
-              <button onClick={handleCalendar} ref={calendarIconRef}>
-                <img src={calendar_icon} className="w-7 h-7" />
-              </button>
             </div>
 
             <div className="flex items-center gap-6 mr-6">
@@ -347,11 +333,6 @@ const MainMyEventView: React.FC = () => {
             />
           )}
 
-          {/* 새로 추가된 CalendarModal */}
-          <CalendarModal
-            isOpen={isCalendarModalOpen}
-            onClose={() => setIsCalendarModalOpen(false)}
-          />
 
           {isFirstLoginEventModalOpen && (
             <FirstLoginEventModal

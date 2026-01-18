@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ImageButton } from "../common/ImageButton";
-import unboxing_explain from "../../assets/images/button/unboxing_explain.svg";
 import unboxing_tutorial from "../../assets/images/main/unboxing_tutorial.svg";
 import ok_button from "../../assets/images/button/ok_button.svg";
 import chatlist_ex from "../../assets/images/tutorial/chatlist_ex.svg"
@@ -62,7 +61,7 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
         const y = rect.top + rect.height / 2 + window.scrollY;
         // 아이콘보다 약간 크게 오려서 여유를 둠
         let radius = Math.max(rect.width, rect.height) / 2 + 8;
-        if ([1, 4, 6].includes(page)) {
+        if ([1, 4, 5].includes(page)) {
             radius = 0;
         }
         setCircleInfo({ x, y, radius });
@@ -131,7 +130,6 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
         roundedRectPath,
         circlePath,
         circlePath,
-        circlePath,
         roundedRectPath,
         circlePath,
     ]
@@ -185,23 +183,6 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
             <p className="mb-4">모든 편지는 2월 14일에 열어볼 수 있지만,<br/> 2월 14일 전에 열어볼 수도 있어요!</p>
             <p className="mb-4">친구들에게 초콜릿을 <span className="text-chocoletterTextYellow">2개</span> 받을 때마다,<br/> 미리 열어볼 수 있는 기회를 <span className="text-chocoletterTextYellow">1개씩</span> 드립니다!</p>
             <p className="mb-4"><span className="text-chocoletterTextYellow">처음에 미리 열어볼 수 있는 기회를<br/> 1번 드릴게요!</span></p>
-        </div>),
-        (<div
-            style={{
-            position: "fixed",
-            top: "35%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "auto",
-            }}
-            className="flex flex-col items-center text-center text-white text-nowrap text-sm"
-        >
-            <div className="mb-[3dvh] mt-[20dvh]">
-                <img src={unboxing_explain} alt="언박싱 설명" style={{ width: 'auto', height: '200px' }} className="mb-5" />
-            </div>
-            <p className="mb-4">캘린더 아이콘을 클릭하면 2월 14일에<br/><span className="text-chocoletterTextYellow">예약되어 있는 화상 채팅 일정을 확인</span>할 수 있어요!</p>
-            <p className="mb-4">상대방이 일정을 수락했다면 활성화되고,<br/>상대방이 아직 일정을 수락하지 않았다면<br/>비활성화가 되어있을 거에요.</p>
-            <p className="mb-4"><span className="text-chocoletterTextYellow">특별하게 나를 공개하고 싶다면,</span><br/>편지를 보낼 때 화상 채팅을 요청해보세요!</p>
         </div>),
         (<div
             style={{
@@ -355,7 +336,7 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
             left: 0,
             width: screenW,
             height: screenH,
-            clipPath: `path('${page in [1, 4, 6] ? "" : makeHighlightPath(x, y, radius + 4, page)}')`,
+            clipPath: `path('${page in [1, 5] ? "" : makeHighlightPath(x, y, radius + 4, page)}')`,
             clipRule: "evenodd",
             boxShadow: "0 0 10px 5px rgba(255,255,255,0.8)",
             pointerEvents: "none", // 장식용
@@ -378,7 +359,7 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
             }}
             className="flex flex-col items-center text-center text-white"
         >
-            {page < 7 ? 
+            {page < 6 ? 
                 <ImageButton
                     onClick={nextPage}
                     src={ok_button}
@@ -393,7 +374,7 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
             
         </div>
         <div className="absolute bottom-4">
-            <p className="text-white">{page + 1} / 8</p>
+            <p className="text-white">{page + 1} / 7</p>
         </div>
         </div>,
         document.body

@@ -48,10 +48,7 @@ import choco_asset from "../assets/images/main/choco_asset.svg";
 import tool_tip from "../assets/images/main/tool_tip.svg";
 import my_count_background from "../assets/images/main/my_count_background.svg";
 import bell_icon from "../assets/images/main/bell_icon.svg";
-import calendar_icon from "../assets/images/main/calendar_icon.svg";
 import click_text from "../assets/images/main/click_text.svg";
-
-import CalendarModal from "../components/main/my/before/modal/CalendarModal";
 import { countMyGiftBox } from "../services/giftBoxApi";
 import { getAlarmCount } from "../services/alarmApi";
 import { getGiftBoxName } from "../services/giftBoxApi";
@@ -95,14 +92,12 @@ const MainMyBeforeView: React.FC = () => {
   const [isTutorialModalOpen, setIsTutorialModalOpen] = useState(false);
   const tutorialIconRef = useRef<HTMLButtonElement>(null);
   const watchOpenCountRef = useRef<HTMLDivElement>(null);
-  const calendarIconRef = useRef<HTMLButtonElement>(null);
   const chatIconRef = useRef<HTMLButtonElement>(null);
   const giftBoxRef = useRef<HTMLButtonElement>(null);
   const dummyRef = useRef<HTMLDivElement>(null);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   const [alarmCount, setAlarmCount] = useState<number>(0);
 
@@ -155,7 +150,6 @@ const MainMyBeforeView: React.FC = () => {
       tutorialIconRef,
       dummyRef,
       watchOpenCountRef,
-      calendarIconRef,
       dummyRef,
       chatIconRef,
       dummyRef,
@@ -178,9 +172,6 @@ const MainMyBeforeView: React.FC = () => {
     setIsTutorialModalOpen(true);
   };
 
-  const handleCalendar = () => {
-    setIsCalendarModalOpen(true);
-  };
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
@@ -274,9 +265,6 @@ const MainMyBeforeView: React.FC = () => {
             <div className="flex items-center gap-6">
               <button onClick={handleTutorial} ref={tutorialIconRef}>
                 <img src={tutorial_icon} className="w-6 h-6" alt="tutorial icon" />
-              </button>
-              <button onClick={handleCalendar} ref={calendarIconRef}>
-                <img src={calendar_icon} className="w-7 h-7" alt="calendar icon" />
               </button>
             </div>
 
@@ -417,10 +405,6 @@ const MainMyBeforeView: React.FC = () => {
               onClose={() => setIsTutorialModalOpen(false)}
             />
           )}
-          <CalendarModal
-            isOpen={isCalendarModalOpen}
-            onClose={() => setIsCalendarModalOpen(false)}
-          />
           <Notification isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
           {!isFirstLogin && !isWatchNewTutorial && (
             <PointTutorialOverlay
