@@ -28,9 +28,6 @@ import tutorial_icon from "../assets/images/main/tutorial_icon.svg";
 import chat_icon from "../assets/images/main/chat_icon.svg";
 import after_text from "../assets/images/main/after_text.svg";
 import bell_icon from "../assets/images/main/bell_icon.svg";
-import calendar_icon from "../assets/images/main/calendar_icon.svg";
-
-import CalendarModal from "../components/main/my/before/modal/CalendarModal";
 
 const MainMyAfterView: React.FC = () => {
   const navigate = useNavigate();
@@ -55,8 +52,6 @@ const MainMyAfterView: React.FC = () => {
 
   const [isChatModalOpen, setIsChatModalOpen] = useState(false); // 새로운 상태 추가
 
-  // (추가됨) 캘린더 모달
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   // 핸들러들
 
@@ -65,10 +60,6 @@ const MainMyAfterView: React.FC = () => {
     // toast.info("튜토리얼 아이콘 클릭!");
   };
 
-  // (추가됨) 캘린더 모달 열기
-  const handleCalendar = () => {
-    setIsCalendarModalOpen(true);
-  };
 
   const handleLogin = () => {
     navigate("/");

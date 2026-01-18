@@ -93,16 +93,3 @@ export async function sendUnboxingTime(giftId: number, unBoxingTime: string) {
 //     return null;
 //   }
 // }
-
-// 내 언박싱 일정 조회
-export async function fetchMyUnboxingSchedule() {
-  try {
-    // url: /api/v1/gift-box/unboxing/schedule
-    const res = await api.get(`/api/v1/gift-box/unboxing/schedule`);
-    console.log("내 언박싱 일정 조회 성공 : ", res.data)
-    return res.data;
-  } catch (err) {
-    console.error("fetchMyUnboxingSchedule API 호출 중 에러 발생:", err);
-    throw err;
-  }
-}
