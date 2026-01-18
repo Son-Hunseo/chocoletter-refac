@@ -27,7 +27,6 @@ import Backdrop from "../components/common/Backdrop";
 import tutorial_icon from "../assets/images/main/tutorial_icon.svg";
 import chat_icon from "../assets/images/main/chat_icon.svg";
 import after_text from "../assets/images/main/after_text.svg";
-import bell_icon from "../assets/images/main/bell_icon.svg";
 
 const MainMyAfterView: React.FC = () => {
   const navigate = useNavigate();

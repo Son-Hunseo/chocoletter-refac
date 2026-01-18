@@ -44,11 +44,8 @@ import Backdrop from "../components/common/Backdrop";
 import tutorial_icon from "../assets/images/main/tutorial_icon.svg";
 import chat_icon from "../assets/images/main/chat_icon.svg";
 import open_text2 from "../assets/images/main/open_text2.svg";
-import bell_icon from "../assets/images/main/bell_icon.svg";
 import { countMyGiftBox, getGiftBoxName } from "../services/giftBoxApi";
-import { getAlarmCount } from "../services/alarmApi";
 import FirstLoginEventModal from "../components/main/your/before/modal/FirstLoginEventModal";
-import Notification from "../components/main/my/before/modal/Notification";
 import Loading from "../components/common/Loading";
 
 const MainMyEventView: React.FC = () => {
@@ -87,12 +84,11 @@ const MainMyEventView: React.FC = () => {
   const setIsFirstLoginEvent = useSetRecoilState(isFirstLoginEventAtom);
 
   // 로딩 상태들 (API 호출 또는 모달 전환 중)
-  const [isAlarmCountLoading, setIsAlarmCountLoading] = useState<boolean>(false);
   const [isGiftShapeLoading, setIsGiftShapeLoading] = useState<boolean>(false);
   const [shapeNum, setShapeNum] = useState("12");
   const [isFirstLoginEventModalOpen, setIsFirstLoginEventModalOpen] = useState(false);
 
-  const isLoading = isAlarmCountLoading || isGiftShapeLoading;
+  const isLoading = isGiftShapeLoading;
 
   // 튜토리얼 아이콘 ref
   const tutorialIconRef = useRef<HTMLButtonElement>(null);
@@ -107,8 +103,6 @@ const MainMyEventView: React.FC = () => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false); // 새로운 상태 추가
 
 
-  // 알림 개수 상태
-  const [alarmCount, setAlarmCount] = useState<number>(0);
 
   useEffect(() => {
     if (!giftBoxNum || giftBoxNum === 0) {
@@ -118,8 +112,6 @@ const MainMyEventView: React.FC = () => {
 
   // 핸들러들
 
-  // 알림 아이콘 클릭 시 알림 모달을 여는 핸들러 (여기서는 모달 오픈 동작만 처리)
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const tutorialIcons = useMemo(
     () => [
@@ -134,10 +126,6 @@ const MainMyEventView: React.FC = () => {
     []
   );
 
-  const handleNotification = () => {
-    setAlarmCount(0);
-    setIsNotificationOpen(true);
-  };
 
   const handleTutorial = () => {
     setIsTutorialModalOpen(true); // 튜토리얼 모달 열기
@@ -215,23 +203,6 @@ const MainMyEventView: React.FC = () => {
     updateFirstLoginEvent();
   }, [isFirstLoginEvent, isFirstLoginEventModalOpen]);
 
-  // 알림 개수 API 호출 (로딩 포함)
-  useEffect(() => {
-    async function fetchAlarmCount() {
-      setIsAlarmCountLoading(true);
-      try {
-        const count = await getAlarmCount();
-        setAlarmCount(count);
-      } catch (err) {
-        console.error("알림 개수 불러오기 실패:", err);
-      } finally {
-        setIsAlarmCountLoading(false);
-      }
-    }
-    if (!isNotificationOpen) {
-      fetchAlarmCount();
-    }
-  }, [isNotificationOpen]);
 
   return (
     <div className="relative">
@@ -259,16 +230,6 @@ const MainMyEventView: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-6 mr-6">
-              <div className="relative">
-                {alarmCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-400 rounded-md h-3 w-[22px] flex items-center justify-center text-white text-xs font-light">
-                    {alarmCount}
-                  </div>
-                )}
-                <button onClick={handleNotification}>
-                  <img src={bell_icon} className="w-7 h-7 mt-2" alt="notification icon" />
-                </button>
-              </div>
 
               <button onClick={handleChat} ref={chatIconRef}>
                 <img src={chat_icon} className="w-6 h-6" />
@@ -341,7 +302,6 @@ const MainMyEventView: React.FC = () => {
             />
           )}
 
-          <Notification isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
         </div>
       </div>
     </div>
