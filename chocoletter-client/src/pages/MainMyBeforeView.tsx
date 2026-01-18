@@ -47,13 +47,10 @@ import chat_icon from "../assets/images/main/chat_icon.svg";
 import choco_asset from "../assets/images/main/choco_asset.svg";
 import tool_tip from "../assets/images/main/tool_tip.svg";
 import my_count_background from "../assets/images/main/my_count_background.svg";
-import bell_icon from "../assets/images/main/bell_icon.svg";
 import click_text from "../assets/images/main/click_text.svg";
 import { countMyGiftBox } from "../services/giftBoxApi";
-import { getAlarmCount } from "../services/alarmApi";
 import { getGiftBoxName } from "../services/giftBoxApi";
 
-import Notification from "../components/main/my/before/modal/Notification";
 
 import Loading from "../components/common/Loading";
 import ValentineDayCountdownModal from "../components/main/my/before/popup/ValentineDayCountdownModal";
@@ -99,13 +96,11 @@ const MainMyBeforeView: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
-  const [alarmCount, setAlarmCount] = useState<number>(0);
 
   const [isGiftCountLoading, setIsGiftCountLoading] = useState<boolean>(false);
-  const [isAlarmCountLoading, setIsAlarmCountLoading] = useState<boolean>(false);
   const [isGiftShapeLoading, setIsGiftShapeLoading] = useState<boolean>(false);
 
-  const isLoading = isGiftCountLoading || isAlarmCountLoading || isGiftShapeLoading;
+  const isLoading = isGiftCountLoading || isGiftShapeLoading;
 
   useEffect(() => {
     if (!giftBoxNum || giftBoxNum === 0) {
@@ -173,12 +168,7 @@ const MainMyBeforeView: React.FC = () => {
   };
 
 
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
-  const handleNotification = () => {
-    setAlarmCount(0);
-    setIsNotificationOpen(true);
-  };
 
   const handleChat = () => {
     setIsChatModalOpen(true);
@@ -227,23 +217,6 @@ const MainMyBeforeView: React.FC = () => {
     fetchGiftCount();
   }, [setAvailableGifts, setReceivedGifts]);
 
-  // 알림 개수 API 호출 (로딩 포함)
-  useEffect(() => {
-    async function fetchAlarmCount() {
-      setIsAlarmCountLoading(true);
-      try {
-        const count = await getAlarmCount();
-        setAlarmCount(count);
-      } catch (err) {
-        console.error("알림 개수 불러오기 실패:", err);
-      } finally {
-        setIsAlarmCountLoading(false);
-      }
-    }
-    if (!isNotificationOpen) {
-      fetchAlarmCount();
-    }
-  }, [isNotificationOpen]);
 
   return (
     <div className="relative">
@@ -269,16 +242,6 @@ const MainMyBeforeView: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-6 mr-6 relative">
-              <div className="relative">
-                {alarmCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-400 rounded-md h-3 w-[22px] flex items-center justify-center text-white text-xs font-light">
-                    {alarmCount}
-                  </div>
-                )}
-                <button onClick={handleNotification}>
-                  <img src={bell_icon} className="w-7 h-7 mt-2" alt="notification icon" />
-                </button>
-              </div>
               <button onClick={handleChat} ref={chatIconRef}>
                 <img src={chat_icon} className="w-6 h-6" alt="chat icon" />
               </button>
@@ -405,7 +368,6 @@ const MainMyBeforeView: React.FC = () => {
               onClose={() => setIsTutorialModalOpen(false)}
             />
           )}
-          <Notification isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
           {!isFirstLogin && !isWatchNewTutorial && (
             <PointTutorialOverlay
               targetRef={tutorialIconRef}

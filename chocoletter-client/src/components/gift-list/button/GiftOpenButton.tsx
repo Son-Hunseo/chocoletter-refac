@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnnounceDontOpenModal } from "../modal/AnnounceDontOpenModal";
-import { AnnounceGoNotificationModal } from "../modal/AnnounceGoNotification";
 import { IsOpenGeneralGiftModal } from "../modal/IsOpenGeneralGiftModal";
 import { ImageButton } from "../../common/ImageButton";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import {
-	giftListRefreshAtom,
-	selectedGiftIdAtom,
-} from "../../../atoms/gift/giftAtoms";
+import { useRecoilState } from "recoil";
+import { selectedGiftIdAtom } from "../../../atoms/gift/giftAtoms";
 import outline_choco_button from "../../../assets/images/giftbox/outline_choco_button.svg";
 import bg_choco_button from "../../../assets/images/giftbox/bg_choco_button.svg";
 import { UnboxingTimeSticker } from "../UnboxingTimeSticker";
 import { toast } from "react-toastify";
-import AcceptRejectModal from "../../main/my/before/modal/AcceptRejectModal";
-import {
-	patchUnboxingAccept,
-	patchUnboxingReject,
-} from "../../../services/unboxingApi";
 
 const generalImages = import.meta.glob(
 	"../../../assets/images/chocolate/general/*.svg",
@@ -81,20 +72,11 @@ export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
 }) => {
 	const [isRTC, setIsRTC] = useState(false);
 	const [isNonOpen, setIsNonOpen] = useState(false);
-	// const [isAnnounceNoti, setIsAnnounceNoti] = useState(false);
-	const [isAcceptRejectOpen, setIsAcceptRejectOpen] = useState(false);
 	const navigate = useNavigate();
 	const [atomGiftId, setAtomGiftId] = useRecoilState(selectedGiftIdAtom);
-	const setRefresh = useSetRecoilState(giftListRefreshAtom); // 새로고침 플래그 관리
-	const refresh = useRecoilValue(giftListRefreshAtom); // refresh 값을 모니터링
 
 	const [buttonImage, setButtonImage] = useState("");
 	const currentDate = new Date();
-
-	// refresh 값이 변경되면 AcceptRejectModal을 자동으로 닫음
-	useEffect(() => {
-		setIsAcceptRejectOpen(false);
-	}, [refresh]);
 
 	// 1. 안 열린 일반 초콜릿
 	// 횟수를 사용하는 모달로 안내
@@ -139,14 +121,6 @@ export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
 		setIsNonOpen(false);
 	};
 
-	// const closeGoNotificationModal = () => {
-	//     setIsAnnounceNoti(false);
-	// }
-
-	const closeAcceptRejectModal = () => {
-		setIsAcceptRejectOpen(false);
-	};
-
 	// 버튼 onClick 메서드
 	const giftOpenButtonClickHandler = async () => {
 		if (giftType === "SPECIAL") {
@@ -161,12 +135,7 @@ export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
 			// 이거 이벤트 이후도 추가해야 할 것 같은데...
 			// 날짜 분류도 필요할 것 같은데...
 			if (currentDate < unboxingMinusFive) {
-				if (isAccepted) {
-					setIsRTC(true);
-				} else {
-					// setIsAnnounceNoti(true);
-					setIsAcceptRejectOpen(true);
-				}
+				setIsRTC(true);
 			} else {
 				if (roomId === null) {
 					navigate("/gift-list/before");
@@ -191,41 +160,8 @@ export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
 		}
 	};
 
-	// 수락 처리: giftId가 존재할 경우 patchUnboxingAccept API 호출
-	const handleAccept = async () => {
-		try {
-			const result = await patchUnboxingAccept(giftId);
-			console.log("수락 처리 성공:", result);
-			setIsAcceptRejectOpen(false);
-			onRefresh();
-		} catch (error) {
-			console.error("수락 처리 중 에러 발생:", error);
-		}
-	};
-
-	// 거절 처리: giftId가 존재할 경우 patchUnboxingReject API 호출
-	const handleReject = async () => {
-		try {
-			const result = await patchUnboxingReject(giftId);
-			console.log("거절 처리 성공:", result);
-			setIsAcceptRejectOpen(false);
-			onRefresh();
-		} catch (error) {
-			console.error("거절 처리 중 에러 발생:", error);
-		}
-	};
-
 	return (
 		<div className="relative w-[100px] h-full aspect-square rounded-lg flex items-center justify-center">
-			{isAcceptRejectOpen && (
-				<AcceptRejectModal
-					onClose={closeAcceptRejectModal}
-					onAccept={handleAccept}
-					onReject={handleReject}
-				/>
-			)}
-			{/* <AnnounceGoNotificationModal isOpen={isAnnounceNoti} onClose={closeGoNotificationModal} /> */}
-
 			<AnnounceDontOpenModal isOpen={isRTC} onClose={closeRTCModal} />
 			<IsOpenGeneralGiftModal
 				isOpen={isNonOpen}
