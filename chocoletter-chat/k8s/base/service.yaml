@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chocoletter-chat-service
+  namespace: chocoletter
+spec:
+  type: ClusterIP
+  selector:
+    app: chocoletter-chat
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081

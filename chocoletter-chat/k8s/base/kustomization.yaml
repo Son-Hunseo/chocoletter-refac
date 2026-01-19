@@ -1,0 +1,5 @@
+resources:
+  - service.yaml
+  - deploy.yaml
+  - redis-deploy.yaml
+  - redis-service.yaml

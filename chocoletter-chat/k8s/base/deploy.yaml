@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: refac-chocoletter-chat
+  namespace: chocoletter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chocoletter-chat
+  template:
+    metadata:
+      labels:
+        app: chocoletter-chat
+    spec:
+      containers:
+        - name: chocoletter-chat
+          image: chocoletter-chat-image # 가상 이름, Overlay에서 변경
+          ports:
+            - containerPort: 8081
