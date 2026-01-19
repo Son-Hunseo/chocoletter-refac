@@ -16,10 +16,8 @@ import chocolate.chocoletter.api.member.domain.Member;
 import chocolate.chocoletter.api.member.service.MemberService;
 import chocolate.chocoletter.common.exception.ErrorMessage;
 import chocolate.chocoletter.common.exception.ForbiddenException;
-import chocolate.chocoletter.common.util.DateTimeUtil;
 import chocolate.chocoletter.common.util.IdEncryptionUtil;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +31,6 @@ public class GiftService {
     private final GiftRepository giftRepository;
     private final LetterService letterService;
     private final ChatRoomService chatRoomService;
-    private final DateTimeUtil dateTimeUtil;
     private final MemberService memberService;
     private final IdEncryptionUtil idEncryptionUtil;
     private final GiftBoxRepository giftBoxRepository;
@@ -67,11 +64,6 @@ public class GiftService {
         Gift gift = giftRepository.findGiftById(giftId);
         if (!memberId.equals(gift.getReceiverId())) {
             throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
-        }
-        LocalDate restrictedDate = dateTimeUtil.getOpenDay();
-        LocalDate today = LocalDate.now();
-        if (today.isBefore(restrictedDate) && gift.getType() == GiftType.SPECIAL) {
-            throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN_SPECIAL_BEFORE_DATE);
         }
         gift.openGift();
         String encryptedGiftId = idEncryptionUtil.encrypt(gift.getId());
