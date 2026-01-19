@@ -19,7 +19,6 @@ import ChatRoomListView from "./pages/ChatRoomListView";
 import SelectGiftBoxView from "./pages/SelectGiftBoxView";
 import MainYourBeforeView from "./pages/MainYourBeforeView";
 import MainMyEventView from "./pages/MainMyEventView";
-import MainMyAfterView from "./pages/MainMyAfterView";
 import ChatRoomView from "./pages/ChatRoomView";
 import GiftBoxIdRouter from "./pages/GiftBoxIdRouter";
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -65,7 +64,6 @@ function App() {
               <Route path="/chat/list" element={<ChatRoomListView />} />
               <Route path="/select-giftbox" element={<SelectGiftBoxView />} />
               <Route path="/main/my/event" element={<MainMyEventView />} />
-              <Route path="/main/my/after" element={<MainMyAfterView />} />
               {/* <Route path="/chat/room" element={<ChatRoomView />} /> */}
               <Route path="/chat/room/:roomId" element={<ChatRoomView />} />
               <Route path="/modify/general/:giftBoxId" element={<ModifyGeneralLetterView />} />

@@ -5,7 +5,6 @@ import { giftBoxIdAtom } from "../atoms/auth/userAtoms";
 import { isGiftBoxSelectedAtom } from "../atoms/auth/userAtoms";
 import MainMyBeforeView from "./MainMyBeforeView";
 import MainMyEventView from "./MainMyEventView";
-import MainMyAfterView from "./MainMyAfterView";
 import MainYourBeforeView from "./MainYourBeforeView";
 import SelectGiftBoxView from "./SelectGiftBoxView";
 import MainYourEventView from "./MainYourEventView";
@@ -57,10 +56,8 @@ const GiftBoxIdRouter: React.FC = () => {
 
 		if (today < eventDate) {
 			return <MainMyBeforeView />;
-		} else if (today.toDateString() === eventDate.toDateString()) {
-			return <MainMyEventView />;
 		} else {
-			return <MainMyAfterView />;
+			return <MainMyEventView />;
 		}
 	} else {
 		navigate("/");
