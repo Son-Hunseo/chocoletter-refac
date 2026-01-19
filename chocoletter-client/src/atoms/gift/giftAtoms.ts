@@ -34,14 +34,6 @@ export const selectedGiftIdAtom = atom<string | null>({
   effects_UNSTABLE: [persistAtom],
 });
 
-/**
- * 사용자가 선택한 필터(전체, 일반, 특별)
- */
-export const selectedGiftTypeAtom = atom<"all" | "general" | "special">({
-  key: "selectedGiftType",
-  default: "all",
-});
-
 export const giftListRefreshAtom = atom<boolean>({
   key: 'giftListRefreshAtom',
   default: false,
