@@ -1,15 +1,9 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import GeneralLetterModal from "../../common/GeneralLetterModal";
 import { useRecoilValue } from "recoil";
-import { getGiftDetail } from "../../../services/giftApi";
 import { memberIdAtom, giftBoxIdAtom } from "../../../atoms/auth/userAtoms";
 import Loading from "../../common/Loading";
-import { decryptLetter } from "../../../services/giftEncryptedApi";
-import { getMemberPrivateKey } from "../../../utils/keyManager";
-import { getGiftBoxPublicKey } from "../../../services/keyApi";
-import LetterEncryptedNoneModal from "../../letter/modal/LetterEncryptedNoneModal";
 
 interface LetterInChatModalProps {
 	isOpen: boolean;
@@ -41,63 +35,24 @@ const LetterInChatModal: React.FC<LetterInChatModalProps> = ({
 	const [giftData, setGiftData] = useState<GiftData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<number | null>(null);
-	const [isLetterEncryptedNoneModalOpen, setIsLetterEncryptedNoneModalOpen] =
-		useState(false);
 
 	useEffect(() => {
 		const fetchGiftData = async () => {
 			if (nickName && (content || answer || question)) {
 				try {
+					// Server now returns decrypted content, no client-side decryption needed
 					const data = {
 						nickName: nickName,
 						content: content,
 						question: question,
 						answer: answer,
 					};
-					let updatedData: GiftData = { ...data };
-
-					const privateKey = await getMemberPrivateKey(memberId);
-					if (!privateKey) {
-						setLoading(false);
-						return;
-					}
-
-					const publicKey = await getGiftBoxPublicKey(giftBoxId);
-
-					if (data.question && data.answer) {
-						try {
-							const plainAnswer = await decryptLetter(
-								data.answer,
-								publicKey,
-								privateKey
-							);
-							updatedData.answer = plainAnswer; // 복호화된 답변을 giftData.answer에 반영
-						} catch (e) {
-							updatedData.answer =
-								"브라우저가 변경된 것 같아요. 다시 로그인 해주세요!";
-							setIsLetterEncryptedNoneModalOpen(true);
-						}
-					} else if (data.content) {
-						try {
-							const plainContent = await decryptLetter(
-								data.content,
-								publicKey,
-								privateKey
-							);
-							updatedData.content = plainContent; // 복호화된 편지 내용을 giftData.content에 반영
-						} catch (e) {
-							updatedData.content =
-								"브라우저가 변경된 것 같아요. 다시 로그인 해주세요!";
-							setIsLetterEncryptedNoneModalOpen(true);
-						}
-					}
-
-					setGiftData(updatedData);
+					setGiftData(data);
 				} catch (error: any) {
 					if (error.response?.status === 403) {
-						setError(403); // 에러 상태 설정
+						setError(403);
 					} else {
-						setError(error.response?.status || 500); // 기타 에러 처리
+						setError(error.response?.status || 500);
 					}
 				} finally {
 					setLoading(false);
@@ -111,7 +66,6 @@ const LetterInChatModal: React.FC<LetterInChatModalProps> = ({
 
 	return (
 		<>
-			{/* 메인 콘텐츠 렌더링 */}
 			{loading ? (
 				<Loading />
 			) : error === 403 ? (
@@ -126,14 +80,6 @@ const LetterInChatModal: React.FC<LetterInChatModalProps> = ({
 						question={giftData?.question}
 						answer={giftData?.answer}
 					/>
-					{isLetterEncryptedNoneModalOpen && (
-						<LetterEncryptedNoneModal
-							isOpen={isLetterEncryptedNoneModalOpen}
-							onClose={() =>
-								setIsLetterEncryptedNoneModalOpen(false)
-							}
-						/>
-					)}
 				</div>
 			)}
 		</>
