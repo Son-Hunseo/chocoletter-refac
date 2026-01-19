@@ -18,11 +18,10 @@ public class ChatWebSocketController {
 
     @MessageMapping("/send")
     public void sendMessage(ChatMessageRequestDto chatMessageRequestDto) {
-        // Kafka로 메시지 전송
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String message = objectMapper.writeValueAsString(chatMessageRequestDto);
-            chatMessageProducer.sendMessage(chatMessageRequestDto.getRoomId(), message); // Kafka topic으로 전송
+            chatMessageProducer.sendMessage(chatMessageRequestDto.getRoomId(), message);
         } catch (JsonProcessingException e) {
             throw new InternalServerException(ErrorMessage.ERR_SERIALIZE_MESSAGE);
         }
