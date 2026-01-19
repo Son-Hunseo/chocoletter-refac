@@ -15,7 +15,7 @@ const GiftListBeforeView = () => {
 	const refresh = useRecoilValue(giftListRefreshAtom); // refresh 플래그
 
 	useEffect(() => {
-		getGiftList("all");
+		getGiftList();
 	}, [refresh]);
 
 	useEffect(() => {
@@ -50,7 +50,7 @@ const GiftListBeforeView = () => {
 						</div>
 					</div>
 				</div>
-				<GiftList filter={"all"} />
+				<GiftList />
 			</div>
 		</div>
 	);
