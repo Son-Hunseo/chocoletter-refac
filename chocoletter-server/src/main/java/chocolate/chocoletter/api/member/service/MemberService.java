@@ -29,10 +29,4 @@ public class MemberService {
         Optional<Member> member = memberRepository.findById(memberId);
         return MyPageResponseDto.of(giftBox.get(), member.get());
     }
-
-    @Transactional
-    public void initPublicKey(Long memberId, String publicKey) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        member.ifPresent(value -> value.initPublicKey(publicKey));
-    }
 }

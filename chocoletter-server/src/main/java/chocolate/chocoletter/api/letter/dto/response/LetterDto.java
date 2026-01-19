@@ -16,4 +16,14 @@ public record LetterDto(LetterType type, String nickName, String content, String
                 .answer(letter.getAnswer())
                 .build();
     }
+
+    public static LetterDto ofDecrypted(Letter letter, String decryptedContent, String decryptedAnswer) {
+        return LetterDto.builder()
+                .type(letter.getType())
+                .nickName(letter.getNickname())
+                .content(decryptedContent)
+                .question(letter.getQuestion())
+                .answer(decryptedAnswer)
+                .build();
+    }
 }
