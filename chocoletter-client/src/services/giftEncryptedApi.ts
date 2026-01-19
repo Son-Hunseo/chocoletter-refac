@@ -52,63 +52,6 @@ export async function sendGeneralQuestionGift(
 }
 
 /**
- * 특별 자유 선물 보내기 API
- *
- * @param giftBoxId - 선물 박스 ID
- * @param nickName - 발신자 닉네임
- * @param content - 편지 내용 (평문)
- * @param unBoxingTime - 개봉 시간 (HH:mm 형식, 24시간제)
- */
-export async function sendSpecialFreeGift(
-  giftBoxId: string,
-  nickName: string,
-  content: string,
-  unBoxingTime: string
-) {
-  try {
-    const res = await api.post(`/api/v1/gift-box/${giftBoxId}/gift/special/free`, {
-      nickName,
-      content,
-      unBoxingTime,
-    });
-    return res.data;
-  } catch (err) {
-    console.error("sendSpecialFreeGift API 호출 중 에러 발생:", err);
-    throw err;
-  }
-}
-
-/**
- * 특별 질문 선물 보내기 API
- *
- * @param giftBoxId - 선물 박스 ID
- * @param nickName - 발신자 닉네임
- * @param question - 질문 내용
- * @param answer - 편지 답변 내용 (평문)
- * @param unBoxingTime - 개봉 시간 (HH:mm 형식, 24시간제)
- */
-export async function sendSpecialQuestionGift(
-  giftBoxId: string,
-  nickName: string,
-  question: string,
-  answer: string,
-  unBoxingTime: string
-) {
-  try {
-    const res = await api.post(`/api/v1/gift-box/${giftBoxId}/gift/special/question`, {
-      nickName,
-      question,
-      answer,
-      unBoxingTime,
-    });
-    return res.data;
-  } catch (err) {
-    console.error("sendSpecialQuestionGift API 호출 중 에러 발생:", err);
-    throw err;
-  }
-}
-
-/**
  * 편지 수정하기 API
  *
  * @param giftId - 선물 ID
