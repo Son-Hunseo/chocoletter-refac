@@ -14,8 +14,6 @@ import ErrorBoundary from "./components/common/ErrorBoundary";
 import KakaoLoginCallback from "./components/login/KakaoLoginCallback";
 import useViewportHeight from "./hooks/useViewportHeight";
 import GiftListBeforeView from "./pages/GiftListBeforeView";
-import WaitingRoomView from "./pages/VideoWaitingRoomView";
-import VideoRoomView from "./pages/VideoRoomView";
 import GiftListEventView from "./pages/GiftListEventView";
 import ChatRoomListView from "./pages/ChatRoomListView";
 import SelectGiftBoxView from "./pages/SelectGiftBoxView";
@@ -23,7 +21,6 @@ import MainYourBeforeView from "./pages/MainYourBeforeView";
 import MainMyEventView from "./pages/MainMyEventView";
 import MainMyAfterView from "./pages/MainMyAfterView";
 import ChatRoomView from "./pages/ChatRoomView";
-import TestVideoRoomView from "./pages/TestVideoRoomView";
 import GiftBoxIdRouter from "./pages/GiftBoxIdRouter";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import ModifyGeneralLetterView from "./pages/ModifyGeneralLetterView";
@@ -64,8 +61,6 @@ function App() {
               <Route path="/write/general/:giftBoxId" element={<WriteGeneralLetterView />} />
               <Route path="/write/question/:giftBoxId" element={<WriteQuestionLetterView />} />
               <Route path="/sent-gift" element={<SentGiftView />} />
-              <Route path="/video/waiting-room/:sessionIdInit" element={<WaitingRoomView />} />
-              <Route path="/video/room" element={<VideoRoomView />} />
               <Route path="/gift-list/before" element={<GiftListBeforeView />} />
               <Route path="/gift-list/event" element={<GiftListEventView />} />
               <Route path="/chat/list" element={<ChatRoomListView />} />
@@ -74,7 +69,6 @@ function App() {
               <Route path="/main/my/after" element={<MainMyAfterView />} />
               {/* <Route path="/chat/room" element={<ChatRoomView />} /> */}
               <Route path="/chat/room/:roomId" element={<ChatRoomView />} />
-              <Route path="/video/:sessionIdInit" element={<TestVideoRoomView />} />
               <Route path="/modify/general/:giftBoxId" element={<ModifyGeneralLetterView />} />
               <Route path="/modify/question/:giftBoxId" element={<ModifyQuestionLetterView />} />
             </Route>
