@@ -42,7 +42,6 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route index element={<LoginView />} />
-            {/* <Route path="/test" element={<TestPage />} /> */}
             <Route path="/*" element={<ErrorPage />} />
             <Route path="/error" element={<ErrorPage />} />
             <Route path="/auth/kakao/callback" element={<KakaoLoginCallback />} />
