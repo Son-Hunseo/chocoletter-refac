@@ -2,21 +2,23 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { GoBackButton } from "../components/common/GoBackButton";
-import { Button } from "../components/common/Button";
 import { SingleLetterLimitModal } from "../components/common/SingleLetterLimitModal";
+import { CantSendMessageModal } from "../components/common/CantSendMessageModal";
 import GeneralLetterForm from "../components/write-letter/GeneralLetterForm";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import login_view_service_title from "../assets/images/logo/login_view_service_title.svg";
-import { freeLetterState } from "../atoms/letter/letterAtoms" ;
+import { freeLetterState } from "../atoms/letter/letterAtoms";
 import { ImageButton } from "../components/common/ImageButton";
 import next_button from "../assets/images/button/next_button.svg";
+import { sendGeneralFreeGift } from "../services/giftEncryptedApi";
 
 const WriteGeneralLetterView = () => {
     const [letter, setLetter] = useRecoilState(freeLetterState);
     const { giftBoxId } = useParams();
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [alreadySent, setAlreadySent] = useState(false);
     
     const resetLetterState = () => {
         setLetter({
@@ -55,13 +57,22 @@ const WriteGeneralLetterView = () => {
             setIsModalOpen(true);
         };
 
-    const handleSendLetter = () => {
-        setIsModalOpen(false); // 모달 닫기
-        navigate(`/select-gift/${giftBoxId}`); // 보내기 버튼 클릭 시 이동
+    const handleSendLetter = async () => {
+        setIsModalOpen(false);
+        try {
+            await sendGeneralFreeGift(giftBoxId as string, letter.nickname, letter.content);
+            navigate(`/sent-gift`);
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || "알 수 없는 에러 발생";
+            if (errorMessage === "ERR_ALREADY_EXISTS_GIFT" || errorMessage === "알 수 없는 에러 발생") {
+                setAlreadySent(true);
+            }
+        }
     };
 
     return (
         <div className="relative flex flex-col items-center h-screen bg-letter-pink-background">
+            <CantSendMessageModal isOpen={alreadySent} onClose={() => setAlreadySent(false)} />
             <GoBackButton strokeColor="#9E4AFF" altText="뒤로가기 버튼" onClick={handleGoBack} />
 
             <div className="absolute mt-[41px] m-4">
