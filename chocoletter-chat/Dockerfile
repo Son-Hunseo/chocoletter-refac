@@ -1,5 +1,4 @@
-# 베이스 이미지로 OpenJDK 17을 사용
-FROM openjdk:17-slim AS build
+FROM eclipse-temurin:17-jdk-jammy AS build
 
 # 기본 패키지 설치
 RUN apt-get update && apt-get install -y bash
@@ -23,7 +22,7 @@ COPY src src
 RUN ./gradlew clean build -x test  
 
 # 빌드 결과물을 실행할 새로운 스테이지
-FROM openjdk:17-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
 
@@ -31,4 +30,4 @@ WORKDIR /app
 COPY --from=build /app/build/libs/chat-0.0.1-SNAPSHOT.jar app.jar
 
 # 애플리케이션 실행
-ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]

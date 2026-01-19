@@ -1,0 +1,20 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+    import: optional:file:env/prod.env[.properties]
+  data:
+    mongodb:
+      uri: mongodb+srv://${PROD_MONGO_USERNAME}:${PROD_MONGO_PASSWORD}@${PROD_MONGO_HOST}/${PROD_MONGO_NAME}?appName=${PROD_MONGO_APPNAME}
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
+
+jwt:
+  secret: ${SPRING_JWT_SECRET}
+
+encrypt:
+  secret-key: ${SPRING_ENCRYPT_SECRET_KEY}
+
+server:
+  port: 8081
