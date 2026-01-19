@@ -5,7 +5,7 @@ spring:
     import: optional:file:env/prod.env[.properties]
   data:
     mongodb:
-      uri: mongodb+srv://${PROD_MONGO_USERNAME}:${PROD_MONGO_PASSWORD}@${PROD_MONGO_HOST}/${PROD_MONGO_NAME}?appName=${PROD_MONGO_APPNAME}
+      uri: mongodb+srv://${PROD_MONGO_USERNAME}:${PROD_MONGO_PASSWORD}@${PROD_MONGO_HOST}/${PROD_MONGO_NAME_CHAT}?appName=${PROD_MONGO_APPNAME}
     redis:
       host: ${SPRING_DATA_REDIS_HOST}
       port: ${SPRING_DATA_REDIS_PORT}
