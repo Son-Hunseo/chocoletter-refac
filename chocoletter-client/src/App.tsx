@@ -4,7 +4,6 @@ import LoginView from "./pages/LoginView";
 import ErrorPage from "./pages/ErrorPage";
 import ReceiveView from "./pages/ReceiveView";
 import LetterView from "./pages/LetterView";
-import SelectGiftTypeView from "./pages/SelectGiftTypeView";
 import SelectLetterTypeView from "./pages/SelectLetterTypeView";
 import WriteGeneralLetterView from "./pages/WriteGeneralLetterView";
 import WriteQuestionLetterView from "./pages/WriteQuestionLetterView";
@@ -68,7 +67,6 @@ function App() {
               <Route path="/write/general/:giftBoxId" element={<WriteGeneralLetterView />} />
               <Route path="/write/question/:giftBoxId" element={<WriteQuestionLetterView />} />
               <Route path="/sent-gift" element={<SentGiftView />} />
-              <Route path="/select-gift/:giftBoxId" element={<SelectGiftTypeView />} />
               <Route path="/video/waiting-room/:sessionIdInit" element={<WaitingRoomView />} />
               <Route path="/video/room" element={<VideoRoomView />} />
               <Route path="/reset-time" element={<ResetTimeView />} />
