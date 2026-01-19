@@ -52,9 +52,6 @@ spring:
 encrypt:
   secret-key: ${ENCRYPT_SECRET_KEY}
 
-special-gift:
-  open-day: ${SPECIAL_GIFT_OPEN_DAY}
-
 jwt:
   secret: ${JWT_SECRET}
 
