@@ -8,7 +8,9 @@ const ProtectedRoute: React.FC = () => {
 	const isLogin = useRecoilValue(isLoginAtom);
 
 	useEffect(() => {
-		if (!isLogin) {
+		// recoil-persist 초기화 전에도 localStorage로 체크 (개발 모드 StrictMode 대응)
+		const accessToken = localStorage.getItem("accessToken");
+		if (!isLogin && !accessToken) {
 			navigate("/");
 		}
 	}, [isLogin, navigate]);
