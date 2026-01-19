@@ -12,9 +12,6 @@ import { ToastContainer } from "react-toastify";
 import MainMyBeforeView from "./pages/MainMyBeforeView";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import KakaoLoginCallback from "./components/login/KakaoLoginCallback";
-import ResetTimeView from "./pages/ResetTimeView";
-import SetTimeView from "./pages/SetTimeView";
-import RejectedView from "./pages/RejectedView";
 import useViewportHeight from "./hooks/useViewportHeight";
 import GiftListBeforeView from "./pages/GiftListBeforeView";
 import WaitingRoomView from "./pages/VideoWaitingRoomView";
@@ -69,9 +66,6 @@ function App() {
               <Route path="/sent-gift" element={<SentGiftView />} />
               <Route path="/video/waiting-room/:sessionIdInit" element={<WaitingRoomView />} />
               <Route path="/video/room" element={<VideoRoomView />} />
-              <Route path="/reset-time" element={<ResetTimeView />} />
-              <Route path="/set-time/:giftBoxId" element={<SetTimeView />} />
-              <Route path="/rejected" element={<RejectedView />} />
               <Route path="/gift-list/before" element={<GiftListBeforeView />} />
               <Route path="/gift-list/event" element={<GiftListEventView />} />
               <Route path="/chat/list" element={<ChatRoomListView />} />
