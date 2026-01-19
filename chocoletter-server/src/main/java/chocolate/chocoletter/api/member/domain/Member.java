@@ -41,9 +41,6 @@ public class Member extends BaseTimeEntity implements OAuth2User, UserDetails {
     @Column
     private Integer sendGiftCount;
 
-    @Column
-    private String publicKey;
-
     @Builder
     public Member(String name, String socialId, String profileImgUrl) {
         this.name = name;
@@ -74,10 +71,6 @@ public class Member extends BaseTimeEntity implements OAuth2User, UserDetails {
     public String getPassword() {
         return null;
     } // OAuth2는 비밀번호 없음
-
-    public void initPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
 
     public int increaseSendGiftCount() {
         return ++sendGiftCount;

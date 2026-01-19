@@ -6,6 +6,7 @@ import chocolate.chocoletter.api.letter.domain.Question;
 import chocolate.chocoletter.api.letter.dto.response.LetterDto;
 import chocolate.chocoletter.api.letter.dto.response.RandomQuestionResponseDto;
 import chocolate.chocoletter.api.letter.repository.LetterRepository;
+import chocolate.chocoletter.common.util.LetterEncryptionUtil;
 import jakarta.transaction.Transactional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +16,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LetterService {
     private final LetterRepository letterRepository;
+    private final LetterEncryptionUtil letterEncryptionUtil;
 
     public LetterDto findLetter(Long giftId) {
         Letter letter = letterRepository.findLetterByGiftId(giftId);
-        return LetterDto.of(letter);
+        // Decrypt content and answer before returning
+        String decryptedContent = letterEncryptionUtil.decrypt(letter.getContent());
+        String decryptedAnswer = letterEncryptionUtil.decrypt(letter.getAnswer());
+        return LetterDto.ofDecrypted(letter, decryptedContent, decryptedAnswer);
     }
 
     @Transactional
     public void saveLetter(Letter letter) {
+        // Encrypt content and answer before saving
+        String encryptedContent = letterEncryptionUtil.encrypt(letter.getContent());
+        String encryptedAnswer = letterEncryptionUtil.encrypt(letter.getAnswer());
+        letter.modify(letter.getNickname(), letter.getQuestion(), encryptedAnswer, encryptedContent);
         letterRepository.save(letter);
     }
 
@@ -47,6 +56,9 @@ public class LetterService {
     @Transactional
     public void modifyLetter(Long giftId, ModifyLetterRequestDto requestDto) {
         Letter letter = letterRepository.findLetterByGiftId(giftId);
-        letter.modify(requestDto.nickName(), requestDto.question(), requestDto.answer(), requestDto.content());
+        // Encrypt content and answer before saving
+        String encryptedContent = letterEncryptionUtil.encrypt(requestDto.content());
+        String encryptedAnswer = letterEncryptionUtil.encrypt(requestDto.answer());
+        letter.modify(requestDto.nickName(), requestDto.question(), encryptedAnswer, encryptedContent);
     }
 }

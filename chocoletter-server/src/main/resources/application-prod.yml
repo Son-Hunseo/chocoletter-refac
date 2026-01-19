@@ -65,3 +65,6 @@ special-gift:
 
 scheduler:
   event-day-transition-cron: "0 */10 * * * *"
+
+letter:
+  encrypt-key: ${LETTER_ENCRYPT_KEY}
