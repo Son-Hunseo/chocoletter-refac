@@ -1,4 +1,3 @@
-// KakaoLoginCallback.tsx (일부)
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
@@ -16,15 +15,6 @@ import {
 	isGiftBoxSelectedAtom,
 	giftBoxNumAtom,
 } from "../../atoms/auth/userAtoms";
-import {
-	generateAndStoreKeyPairForMember,
-	getMemberPrivateKey,
-	getMemberPublicKey,
-} from "../../utils/keyManager";
-import {
-	arrayBufferToBase64,
-	registerFixedSymmetricKey,
-} from "../../utils/encryption";
 import { getGiftBoxName } from "../../services/giftBoxApi";
 
 const getGiftBoxNumFill = async (giftBoxId: string) => {
@@ -88,20 +78,6 @@ const KakaoLoginCallback: React.FC = () => {
 			setUserProfileUrl(userProfileUrl || "");
 			setGiftBoxId(giftBoxId);
 			setMemberId(memberId);
-
-			await generateAndStoreKeyPairForMember(memberId);
-
-			const publicKeyCryptoKey = await getMemberPublicKey(memberId);
-			if (!publicKeyCryptoKey) {
-				throw new Error("공개키 로딩 실패");
-			}
-			const exportedPublicKey = await window.crypto.subtle.exportKey(
-				"spki",
-				publicKeyCryptoKey
-			);
-			const publicKeyB64 = arrayBufferToBase64(exportedPublicKey);
-
-			await registerFixedSymmetricKey(publicKeyB64);
 
 			const giftBoxInfo = await getGiftBoxNumFill(giftBoxId);
 			if (!giftBoxInfo) {
