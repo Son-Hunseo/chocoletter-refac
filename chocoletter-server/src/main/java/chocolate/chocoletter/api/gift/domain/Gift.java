@@ -12,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,45 +41,24 @@ public class Gift extends BaseTimeEntity {
     @Column(nullable = false)
     private GiftType type;
 
-    private LocalDateTime unBoxingTime;
-
-    private Boolean isAccept;
-
     private Boolean isOpened;
 
-    private Gift(GiftBox giftBox, Long senderId, Long receiverId, GiftType type, LocalDateTime unBoxingTime,
-                 Boolean isAccept) {
+    private Gift(GiftBox giftBox, Long senderId, Long receiverId, GiftType type) {
         this.giftBox = giftBox;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.type = type;
-        this.unBoxingTime = unBoxingTime;
-        this.isAccept = isAccept;
         this.isOpened = false;
     }
 
     @Builder(builderClassName = "createGeneralGiftBuilder", builderMethodName = "createGeneralGift")
     public static Gift createGeneralGift(GiftBox giftBox, Long senderId, Long receiverId) {
-        return new Gift(giftBox, senderId, receiverId, GiftType.GENERAL, null, null);
+        return new Gift(giftBox, senderId, receiverId, GiftType.GENERAL);
     }
 
     @Builder(builderClassName = "createSpecialGiftBuilder", builderMethodName = "createSpecialGift")
-    public static Gift createSpecialGift(GiftBox giftBox, Long senderId, Long receiverId, LocalDateTime unBoxingTime) {
-        return new Gift(giftBox, senderId, receiverId, GiftType.SPECIAL, unBoxingTime, false);
-    }
-
-    public void acceptUnboxing() {
-        this.isAccept = true;
-    }
-
-    public void changeToGeneralGift() {
-        this.type = GiftType.GENERAL;
-        this.isAccept = null;
-        this.unBoxingTime = null;
-    }
-
-    public void updateUnBoxingTime(LocalDateTime unBoxingTime) {
-        this.unBoxingTime = unBoxingTime;
+    public static Gift createSpecialGift(GiftBox giftBox, Long senderId, Long receiverId) {
+        return new Gift(giftBox, senderId, receiverId, GiftType.SPECIAL);
     }
 
     public void openGift() {

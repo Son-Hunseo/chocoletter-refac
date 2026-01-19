@@ -8,8 +8,6 @@ import chocolate.chocoletter.api.giftbox.dto.request.SpecialFreeGiftRequestDto;
 import chocolate.chocoletter.api.giftbox.dto.request.SpecialQuestionGiftRequestDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftBoxResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftCountResponseDto;
-import chocolate.chocoletter.api.giftbox.dto.response.MyUnBoxingTimesResponseDto;
-import chocolate.chocoletter.api.giftbox.dto.response.UnboxingTimesResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -171,29 +169,6 @@ public interface GiftBoxSwagger {
             @PathVariable("giftBoxId") Long giftBoxId);
 
     @Operation(
-            summary = "상대방의 unboxing 스케줄 조회",
-            description = "선물을 받을 사람의 RTC 스케줄을 조회합니다.",
-            tags = {"GiftBox"}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = UnboxingTimesResponseDto.class)
-                    )),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "404", description = "없는 초콜릿 박스 입니다.")
-    })
-    ResponseEntity<?> findUnboxingTimes(
-            @Parameter(
-                    description = "암호화된 형태의 giftBox Id (String 타입으로 전달)",
-                    schema = @Schema(type = "string")
-            )
-            @PathVariable("giftBoxId") Long giftBoxId, Principal principal);
-
-    @Operation(
             summary = "열어볼 수 있는 선물 카운트 사용",
             description = "열어볼 수 있는 선물 카운트를 사용합니다.",
             tags = {"GiftBox"}
@@ -201,31 +176,13 @@ public interface GiftBoxSwagger {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "조회 성공",
+                    description = "사용 성공",
                     content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = UnboxingTimesResponseDto.class)
+                            mediaType = "application/json"
                     )),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     public ResponseEntity<?> usePreviewCount(Principal principal);
-
-    @Operation(
-            summary = "내 언박싱 일정 조회",
-            description = "로그인 한 사람의 언박싱 일정을 조회합니다.",
-            tags = {"GiftBox"}
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = MyUnBoxingTimesResponseDto.class)
-                    )),
-            @ApiResponse(responseCode = "401", description = "인증 실패")
-    })
-    ResponseEntity<?> findMyUnboxingTimes(Principal principal);
 
     @Operation(
             summary = "내 선물함 ID 조회",
