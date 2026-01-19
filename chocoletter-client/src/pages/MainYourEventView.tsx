@@ -50,7 +50,10 @@ const MainYourEventView: React.FC = () => {
 	const dummyRef = useRef<HTMLDivElement>(null);
 
 	// 로그인 상태가 아니라면 바로 NotLoginModal만 렌더링
-	if (!isLoggedIn) {
+	// recoil-persist 초기화 전에도 localStorage로 체크 (개발 모드 StrictMode 대응)
+	const accessToken = localStorage.getItem("accessToken");
+
+	if (!isLoggedIn && !accessToken) {
 		return (
 			<NotLoginModal
 				isOpen={true}
@@ -75,7 +78,8 @@ const MainYourEventView: React.FC = () => {
 	const [isTutorialModalOpen, setIsTutorialModalOpen] = useState(false);
 
 	const handleProfile = () => {
-		if (!isLoggedIn) {
+		const token = localStorage.getItem("accessToken");
+		if (!isLoggedIn && !token) {
 			setIsNotLoginModalOpen(true);
 			return;
 		}
@@ -88,7 +92,8 @@ const MainYourEventView: React.FC = () => {
 
 	// 선물하기 버튼 클릭 시, 먼저 선물 전송 여부를 확인합니다.
 	const handleGoToMyGiftBox = async () => {
-		if (!isLoggedIn) {
+		const token = localStorage.getItem("accessToken");
+		if (!isLoggedIn && !token) {
 			setIsNotLoginModalOpen(true);
 			return;
 		}
