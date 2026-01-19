@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ImageButton } from "../common/ImageButton";
-import unboxing_tutorial from "../../assets/images/main/unboxing_tutorial.svg";
 import ok_button from "../../assets/images/button/ok_button.svg";
 import chatlist_ex from "../../assets/images/tutorial/chatlist_ex.svg"
 import sharemodal_ex from "../../assets/images/tutorial/sharemodal_ex.svg"
@@ -9,7 +8,6 @@ import sharemodal_ex from "../../assets/images/tutorial/sharemodal_ex.svg"
 // import giftbox_before_12 from "../../assets/images/giftbox/giftbox_before_12.svg";
 import { FiArrowUpCircle } from "react-icons/fi";
 import share_button from "../../assets/images/button/share_button.svg";
-import encrypted_icon from "../../assets/images/tutorial/encrypted.svg";
 import start_button from "../../assets/images/button/start_button.svg";
 import prev_choco from "../../assets/images/tutorial/prev_choco.svg";
 
@@ -57,12 +55,18 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
         const rect = targetRef.current.getBoundingClientRect();
 
         // 스크롤 보정
-        const x = rect.left + rect.width / 2 + window.scrollX;
-        const y = rect.top + rect.height / 2 + window.scrollY;
+        let x = rect.left + rect.width / 2 + window.scrollX;
+        let y = rect.top + rect.height / 2 + window.scrollY;
         // 아이콘보다 약간 크게 오려서 여유를 둠
         let radius = Math.max(rect.width, rect.height) / 2 + 8;
-        if ([1, 4, 5].includes(page)) {
+        if ([2, 3].includes(page)) {
             radius = 0;
+        }
+        // 5번째 페이지(시작하기): 화면 중앙 선물함을 가리키는 큰 원
+        if (page === 4) {
+            x = window.innerWidth / 2;
+            y = window.innerHeight * 0.55;
+            radius = Math.min(window.innerWidth, window.innerHeight) * 0.3;
         }
         setCircleInfo({ x, y, radius });
         };
@@ -126,9 +130,7 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
 
     const shapePaths = [
         circlePath,
-        circlePath,
         roundedRectPath,
-        circlePath,
         circlePath,
         roundedRectPath,
         circlePath,
@@ -163,42 +165,12 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
             }}
             className="flex flex-col items-center text-center text-white text-nowrap"
         >
-            <img src={encrypted_icon} alt="보안 강화" className="mb-[10dvh]" />
-            <p className="mb-4">초코레터는 이용자분들의<br/><span className="text-chocoletterTextYellow">개인정보를 수집하지 않아요!</span></p>
-            <p>작성되는 편지는 <span className="text-chocoletterTextYellow">철저히 암호화</span>되어<br/>편지를 받는 사람 외에는<br/>아무도 내용을 확인할 수 없어요!</p>
-        </div>),
-        (<div
-            style={{
-            position: "fixed",
-            top: "45%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "auto",
-            }}
-            className="flex flex-col items-center text-center text-white text-nowrap"
-        >
             <div className="mb-[10dvh]">
                 <img src={prev_choco} alt="미리 열기" />
             </div>
             <p className="mb-4">모든 편지는 2월 14일에 열어볼 수 있지만,<br/> 2월 14일 전에 열어볼 수도 있어요!</p>
             <p className="mb-4">친구들에게 초콜릿을 <span className="text-chocoletterTextYellow">2개</span> 받을 때마다,<br/> 미리 열어볼 수 있는 기회를 <span className="text-chocoletterTextYellow">1개씩</span> 드립니다!</p>
             <p className="mb-4"><span className="text-chocoletterTextYellow">처음에 미리 열어볼 수 있는 기회를<br/> 1번 드릴게요!</span></p>
-        </div>),
-        (<div
-            style={{
-            pointerEvents: "auto",
-            }}
-            className="absolute w-full sm:max-w-sm flex flex-col justify-center items-center text-center text-white text-nowrap"
-        >
-            <div className="bg-black/80 w-full">
-                <div className="relative flex justify-center items-center w-full sm:max-w-sm">
-                    <img src={unboxing_tutorial} alt="언박싱_차은우_카리나" className="h-screen" style={{ width: "100%"}} />
-                    <div className="absolute text-center bottom-[25%]">
-                        <p className="mb-4">2월 14일, 5분 전부터 언박싱 초대장이 활성화 돼요.<br/>클릭하면 영상통화가 연결되고,<br/><span className="text-chocoletterTextYellow">1분 30초 동안 친구와 통화</span>를 할 수 있어요.</p>
-                        <p>같이 편지를 읽어보면서<br/>친구와 특별한 순간을 함께 해보세요!</p>
-                    </div>
-                </div>
-            </div>
         </div>),
         (<div
             style={{
@@ -359,7 +331,7 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
             }}
             className="flex flex-col items-center text-center text-white"
         >
-            {page < 6 ? 
+            {page < 4 ?
                 <ImageButton
                     onClick={nextPage}
                     src={ok_button}
@@ -374,7 +346,7 @@ export const FowardTutorialOverlay: React.FC<FowardTutorialOverlayProps> = ({
             
         </div>
         <div className="absolute bottom-4">
-            <p className="text-white">{page + 1} / 7</p>
+            <p className="text-white">{page + 1} / 5</p>
         </div>
         </div>,
         document.body
