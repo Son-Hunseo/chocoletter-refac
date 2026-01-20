@@ -40,7 +40,7 @@ spring:
           kakao:
             client-id: ${KAKAO_CLIENT_ID_CHOCO}
             authorization-grant-type: authorization_code
-            redirect-uri: ${KAKAO_REDIRECT_URI}
+            redirect-uri: ${ORIGIN_REDI_URL}
             scope: profile_nickname, profile_image
         provider:
           kakao: # registration 이름과 일치해야 함
@@ -55,7 +55,7 @@ jwt:
 encrypt:
   secret-key: ${ENCRYPT_SECRET_KEY}
 
-frontend-url: ${FRONTEND_URL}
+frontend-url: ${ORIGIN_URL}
 
 letter:
   encrypt-key: ${LETTER_ENCRYPT_KEY}
