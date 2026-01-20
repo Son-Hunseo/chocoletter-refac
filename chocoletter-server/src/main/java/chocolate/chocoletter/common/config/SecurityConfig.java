@@ -63,6 +63,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://chocoletter.sonhs.com",
                 "https://chocoletter-server.sonhs.com",
+                "https://chocoletter-after.sonhs.com",
+                "https://chocoletter-server-after.sonhs.com",
                 "http://localhost:5173",
                 "http://localhost:8080"
         ));
