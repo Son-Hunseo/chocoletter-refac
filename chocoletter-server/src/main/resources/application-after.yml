@@ -40,7 +40,7 @@ spring:
           kakao:
             client-id: ${KAKAO_CLIENT_ID_CHOCO}
             authorization-grant-type: authorization_code
-            redirect-uri: ${KAKAO_REDIRECT_URI}
+            redirect-uri: ${KAKAO_REDIRECT_URI_AFTER}
             scope: profile_nickname, profile_image
         provider:
           kakao: # registration 이름과 일치해야 함
