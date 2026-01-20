@@ -2,7 +2,7 @@ FROM node:20-alpine AS build-stage
 
 WORKDIR /app
 
-ARG VITE_API_SERVER_URL=https://chocoletter-server.sonhs.com
+ARG VITE_API_SERVER_URL=https://chocoletter-server-after.sonhs.com
 ARG VITE_KAKAOTALK_JAVASCRIPT_KEY=f498644527a9cae748dcfb9a626a9a85
 ARG VITE_EVENT_DAY=0101
 ARG VITE_CHAT_WEBSOCKET_ENDPOINT=wss://chocoletter-chat.sonhs.com/chat
