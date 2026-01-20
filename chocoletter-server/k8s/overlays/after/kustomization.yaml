@@ -13,7 +13,7 @@ resources:
 images:
   - name: chocoletter-server-image
     newName: 211125633965.dkr.ecr.ap-northeast-2.amazonaws.com/refac/chocoletter-server-after
-    newTag: "0.2"
+    newTag: "0.4"
 
 patches:
   # Deployment 이름 및 labels/selector 변경
