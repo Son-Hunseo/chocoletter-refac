@@ -18,10 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: chocoletter-server-image
-      DEPLOY_FILE: chocoletter-server/k8s/overlays/prod/kustomization.yaml
       AWS_REGION: ap-northeast-2
-      ECR_REPOSITORY: refac/chocoletter-server
 
     steps:
       - name: Checkout
@@ -43,34 +40,66 @@ jobs:
         run: |
           echo "ECR_REGISTRY=${{ steps.ecr_login.outputs.registry }}" >> $GITHUB_ENV
 
-      # 최신 태그 조회 + 0.1 증가 (외부 파이썬 스크립트 사용)
-      - name: Calculate next image tag
-        id: next_tag
+      # before (prod) 환경 빌드
+      - name: Calculate next image tag (before)
+        id: next_tag_before
         run: |
+          ECR_REPOSITORY="refac/chocoletter-server"
           JSON="$(aws ecr describe-images \
             --repository-name "${ECR_REPOSITORY}" \
             --query 'imageDetails' \
             --output json || echo '[]')"
-          
+
           NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
-          echo "NEXT_TAG=${NEXT_TAG}" >> $GITHUB_ENV
+          echo "NEXT_TAG_BEFORE=${NEXT_TAG}" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY_BEFORE=${ECR_REPOSITORY}" >> $GITHUB_ENV
 
-      - name: Build & Push Docker image
+      - name: Build & Push Docker image (before)
         run: |
-          docker build -t ${IMAGE_NAME}:${NEXT_TAG} ./chocoletter-server
-          docker tag ${IMAGE_NAME}:${NEXT_TAG} ${ECR_REGISTRY}/${ECR_REPOSITORY}:${NEXT_TAG}
-          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${NEXT_TAG}
+          IMAGE_NAME="chocoletter-server-image"
+          docker build -t ${IMAGE_NAME}:${NEXT_TAG_BEFORE} -f ./chocoletter-server/Dockerfile ./chocoletter-server
+          docker tag ${IMAGE_NAME}:${NEXT_TAG_BEFORE} ${ECR_REGISTRY}/${ECR_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
+          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
 
-      - name: Update kustomization.yaml image tag
+      - name: Update kustomization.yaml image tag (before)
         run: |
+          DEPLOY_FILE="chocoletter-server/k8s/overlays/prod/kustomization.yaml"
           sed -i -E \
-            "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG}\"|" \
+            "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG_BEFORE}\"|" \
+            "${DEPLOY_FILE}"
+
+      # after 환경 빌드
+      - name: Calculate next image tag (after)
+        id: next_tag_after
+        run: |
+          ECR_REPOSITORY="refac/chocoletter-server-after"
+          JSON="$(aws ecr describe-images \
+            --repository-name "${ECR_REPOSITORY}" \
+            --query 'imageDetails' \
+            --output json || echo '[]')"
+
+          NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
+          echo "NEXT_TAG_AFTER=${NEXT_TAG}" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY_AFTER=${ECR_REPOSITORY}" >> $GITHUB_ENV
+
+      - name: Build & Push Docker image (after)
+        run: |
+          IMAGE_NAME="chocoletter-server-after-image"
+          docker build -t ${IMAGE_NAME}:${NEXT_TAG_AFTER} -f ./chocoletter-server/Dockerfile.after ./chocoletter-server
+          docker tag ${IMAGE_NAME}:${NEXT_TAG_AFTER} ${ECR_REGISTRY}/${ECR_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
+          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
+
+      - name: Update kustomization.yaml image tag (after)
+        run: |
+          DEPLOY_FILE="chocoletter-server/k8s/overlays/after/kustomization.yaml"
+          sed -i -E \
+            "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG_AFTER}\"|" \
             "${DEPLOY_FILE}"
 
       - name: Commit and push
         run: |
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          git add "${DEPLOY_FILE}"
-          git commit -m "chore(k8s): bump image tag to ${NEXT_TAG} [skip ci]" || exit 0
+          git add chocoletter-server/k8s/overlays/prod/kustomization.yaml chocoletter-server/k8s/overlays/after/kustomization.yaml
+          git commit -m "chore(k8s): bump image tag to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER} [skip ci]" || exit 0
           git push

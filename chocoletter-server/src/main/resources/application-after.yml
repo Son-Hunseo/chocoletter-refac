@@ -1,0 +1,61 @@
+spring:
+  config:
+    activate:
+      on-profile: after
+    import: optional:file:env/prod.env[.properties]
+
+  # DB
+  server:
+    tomcat:
+      threads:
+        max: 200 # 쓰레드 풀
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_URL}:${DB_PORT}/${DB_SCHEMA}?useSSL=true&serverTimezone=Asia/Seoul&useUniCode=yes&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximumPoolSize: 60  # 최대 커넥션 수 (기본값 10)
+      minimumIdle: 10       # 최소 유지 커넥션
+      idleTimeout: 30000    # (30초) 사용하지 않는 커넥션 종료
+      connectionTimeout: 30000  # (30초) 커넥션 대기 시간
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        storage_engine: innodb
+        jdbc:
+          batch_size: 50
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID_CHOCO}
+            authorization-grant-type: authorization_code
+            redirect-uri: ${KAKAO_REDIRECT_URI}
+            scope: profile_nickname, profile_image
+        provider:
+          kakao: # registration 이름과 일치해야 함
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id # 사용자 정보에서 ID 추출 필드
+
+jwt:
+  secret: ${JWT_SECRET}
+
+encrypt:
+  secret-key: ${ENCRYPT_SECRET_KEY}
+
+frontend-url: ${FRONTEND_URL_AFTER}
+
+letter:
+  encrypt-key: ${LETTER_ENCRYPT_KEY}

@@ -1,0 +1,52 @@
+# prerequisite:
+# - aws iam 인증정보가 담긴 Secret
+# - 즉, awssm-secret은 클러스터에서 chocoletter 네임스페이스에 직접 생성해야함 (access-key, secret-access-key 등록)
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - certificate.yaml
+  - http-route.yaml
+
+images:
+  - name: chocoletter-server-image
+    newName: 211125633965.dkr.ecr.ap-northeast-2.amazonaws.com/refac/chocoletter-server-after
+    newTag: "0.1"
+
+patches:
+  # Deployment 이름 및 labels/selector 변경
+  - target:
+      kind: Deployment
+      name: refac-chocoletter-server
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: refac-chocoletter-server-after
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: chocoletter-server-after
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: chocoletter-server-after
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: chocoletter-server-after
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{name: ecr-registry-key}]
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value: [{secretRef: {name: chocoletter-k8s-secret}}]
+  # Service 이름 및 selector 변경
+  - target:
+      kind: Service
+      name: chocoletter-server-service
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: chocoletter-server-after-service
+      - op: replace
+        path: /spec/selector/app
+        value: chocoletter-server-after
