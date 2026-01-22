@@ -277,7 +277,7 @@ const CaptureModal: React.FC<CaptureModalProps> = ({ isVisible, onClose }) => {
 			const giftBoxId = await getGiftBoxId();
 			const sharedLink = !giftBoxId
 				? window.location.href
-				: `https://www.chocolate-letter.com/main/${giftBoxId}`;
+				: `https://chocoletter.sonhs.com/main/${giftBoxId}`;
 			await copyToClipboard(sharedLink);
 			toast.dismiss();
 			toast.success("링크가 복사되었습니다!");

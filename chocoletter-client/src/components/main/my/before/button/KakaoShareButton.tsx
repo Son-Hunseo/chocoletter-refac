@@ -18,7 +18,7 @@ const KakaoShareButton: React.FC<KakaoShareButtonProps> = ({ shareLink }) => {
 				title: `${userName}님에게 초콜릿을 전해보세요!💌`,
 				description: "모든 초콜릿(편지)은 익명으로 전달됩니다.",
 				imageUrl:
-					"https://www.chocolate-letter.com/chocoletter_kakao_logo2.png",
+					"https://chocoletter.sonhs.com/chocoletter_kakao_logo2.png",
 				link: {
 					mobileWebUrl: shareLink, // (2) shareLink 사용
 					webUrl: shareLink,

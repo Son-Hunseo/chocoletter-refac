@@ -47,7 +47,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
 					setSharedLink(window.location.href);
 				} else {
 					setSharedLink(
-						`https://www.chocolate-letter.com/main/${giftBoxId}`
+						`https://chocoletter.sonhs.com/main/${giftBoxId}`
 					);
 				}
 			} catch (e) {
