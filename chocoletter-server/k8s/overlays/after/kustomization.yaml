@@ -9,11 +9,12 @@ resources:
   - ../../base
   - certificate.yaml
   - http-route.yaml
+  - external-secret.yaml
 
 images:
   - name: chocoletter-server-image
     newName: 211125633965.dkr.ecr.ap-northeast-2.amazonaws.com/refac/chocoletter-server-after
-    newTag: "0.9"
+    newTag: "1.1"
 
 patches:
   # Deployment 이름 및 labels/selector 변경
@@ -38,7 +39,7 @@ patches:
         value: [{name: ecr-registry-key}]
       - op: add
         path: /spec/template/spec/containers/0/envFrom
-        value: [{secretRef: {name: chocoletter-k8s-secret}}]
+        value: [{secretRef: {name: chocoletter-server-after-secret}}]
   # Service 이름 및 selector 변경
   - target:
       kind: Service
