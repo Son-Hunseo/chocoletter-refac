@@ -9,11 +9,12 @@ resources:
   - ../../base
   - certificate.yaml
   - http-route.yaml
+  - external-secret.yaml
 
 images:
   - name: chocoletter-chat-image
     newName: 211125633965.dkr.ecr.ap-northeast-2.amazonaws.com/refac/chocoletter-chat
-    newTag: "0.5"
+    newTag: "0.7"
 
 patches:
   - target:
@@ -25,4 +26,4 @@ patches:
         value: [{name: ecr-registry-key}]
       - op: add
         path: /spec/template/spec/containers/0/envFrom
-        value: [{secretRef: {name: chocoletter-k8s-secret}}]
+        value: [{secretRef: {name: chocoletter-chat-secret}}]
