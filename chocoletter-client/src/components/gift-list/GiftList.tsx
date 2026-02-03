@@ -35,12 +35,8 @@ export const GiftList: React.FC = () => {
 					<GiftOpenButton
 						key={chocolate.giftId}
 						giftId={chocolate.giftId}
-						giftType={chocolate.giftType}
 						isOpened={chocolate.isOpened}
-						unboxingTime={chocolate.unBoxingTime}
-						isAccepted={chocolate.isAccept}
-						roomId={chocolate.unBoxingRoomId}
-                        onRefresh={onChange}
+						onRefresh={onChange}
 					/>
 				))}
 			</div>
