@@ -29,20 +29,6 @@ public class GiftController implements GiftSwagger {
         return ResponseEntity.ok(gifts);
     }
 
-    @GetMapping("/special")
-    public ResponseEntity<?> findSpecialGifts(Principal principal) {
-        Long memberId = Long.parseLong(principal.getName());
-        GiftsResponseDto gifts = giftService.findSpecialGifts(memberId);
-        return ResponseEntity.ok(gifts);
-    }
-
-    @GetMapping("/general")
-    public ResponseEntity<?> findGeneralGifts(Principal principal) {
-        Long memberId = Long.parseLong(principal.getName());
-        GiftsResponseDto gifts = giftService.findGeneralGifts(memberId);
-        return ResponseEntity.ok(gifts);
-    }
-
     @GetMapping("/{giftId}/receive")
     public ResponseEntity<?> findReceiveGiftDetail(@DecryptedId @PathVariable("giftId") Long giftId,
                                                    Principal principal) {

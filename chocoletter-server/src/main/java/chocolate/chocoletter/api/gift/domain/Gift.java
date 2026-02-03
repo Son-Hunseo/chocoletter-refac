@@ -4,8 +4,6 @@ import chocolate.chocoletter.api.giftbox.domain.GiftBox;
 import chocolate.chocoletter.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,28 +35,18 @@ public class Gift extends BaseTimeEntity {
     @Column(nullable = false)
     private Long receiverId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private GiftType type;
-
     private Boolean isOpened;
 
-    private Gift(GiftBox giftBox, Long senderId, Long receiverId, GiftType type) {
+    private Gift(GiftBox giftBox, Long senderId, Long receiverId) {
         this.giftBox = giftBox;
         this.senderId = senderId;
         this.receiverId = receiverId;
-        this.type = type;
         this.isOpened = false;
     }
 
-    @Builder(builderClassName = "createGeneralGiftBuilder", builderMethodName = "createGeneralGift")
-    public static Gift createGeneralGift(GiftBox giftBox, Long senderId, Long receiverId) {
-        return new Gift(giftBox, senderId, receiverId, GiftType.GENERAL);
-    }
-
-    @Builder(builderClassName = "createSpecialGiftBuilder", builderMethodName = "createSpecialGift")
-    public static Gift createSpecialGift(GiftBox giftBox, Long senderId, Long receiverId) {
-        return new Gift(giftBox, senderId, receiverId, GiftType.SPECIAL);
+    @Builder(builderClassName = "createGiftBuilder", builderMethodName = "createGift")
+    public static Gift createGift(GiftBox giftBox, Long senderId, Long receiverId) {
+        return new Gift(giftBox, senderId, receiverId);
     }
 
     public void openGift() {

@@ -45,7 +45,7 @@ public class GiftBoxService {
 
     @Transactional
     public void sendGeneralFreeGift(Long senderId, Long giftBoxId, GeneralFreeGiftRequestDto requestDto) {
-        Gift gift = generateGeneralGift(senderId, giftBoxId);
+        Gift gift = generateGift(senderId, giftBoxId);
         Letter letter = Letter.createGeneralLetter(gift, requestDto.nickName(), requestDto.content());
         letterService.saveLetter(letter);
 
@@ -56,7 +56,7 @@ public class GiftBoxService {
 
     @Transactional
     public void sendGeneralQuestionGift(Long senderId, Long giftBoxId, GeneralQuestionRequestDto requestDto) {
-        Gift gift = generateGeneralGift(senderId, giftBoxId);
+        Gift gift = generateGift(senderId, giftBoxId);
         Letter letter = Letter.createQuestionLetter(gift, requestDto.nickName(), requestDto.question(),
                 requestDto.answer());
         letterService.saveLetter(letter);
@@ -68,7 +68,7 @@ public class GiftBoxService {
 
     @Transactional
     public void sendSpecialFreeGift(Long senderId, Long giftBoxId, SpecialFreeGiftRequestDto requestDto) {
-        Gift gift = generateSpecialGift(senderId, giftBoxId);
+        Gift gift = generateGift(senderId, giftBoxId);
         Letter letter = Letter.createGeneralLetter(gift, requestDto.nickName(), requestDto.content());
         letterService.saveLetter(letter);
 
@@ -79,7 +79,7 @@ public class GiftBoxService {
 
     @Transactional
     public void sendSpecialQuestionGift(Long senderId, Long giftBoxId, SpecialQuestionGiftRequestDto requestDto) {
-        Gift gift = generateSpecialGift(senderId, giftBoxId);
+        Gift gift = generateGift(senderId, giftBoxId);
         Letter letter = Letter.createQuestionLetter(gift, requestDto.nickName(), requestDto.question(),
                 requestDto.answer());
         letterService.saveLetter(letter);
@@ -110,24 +110,14 @@ public class GiftBoxService {
     }
 
     @Transactional
-    public Gift generateGeneralGift(Long senderId, Long giftBoxId) {
+    public Gift generateGift(Long senderId, Long giftBoxId) {
         checkGiftExists(senderId, giftBoxId);
         GiftBox receiverGiftBox = findGiftBox(giftBoxId);
-        Gift gift = Gift.createGeneralGift(receiverGiftBox, senderId, receiverGiftBox.getMember().getId());
+        Gift gift = Gift.createGift(receiverGiftBox, senderId, receiverGiftBox.getMember().getId());
         giftService.saveGift(gift);
         makeChattingRoom(gift.getReceiverId(), gift.getSenderId(), gift.getId());
         receiverGiftBox.addGiftCount();
         receiverGiftBox.addGeneralGiftCount();
-        return gift;
-    }
-
-    @Transactional
-    public Gift generateSpecialGift(Long senderId, Long giftBoxId) {
-        checkGiftExists(senderId, giftBoxId);
-        GiftBox receiverGiftBox = findGiftBox(giftBoxId);
-        Gift gift = Gift.createSpecialGift(receiverGiftBox, senderId, receiverGiftBox.getMember().getId());
-        giftService.saveGift(gift);
-        receiverGiftBox.addGiftCount();
         return gift;
     }
 
@@ -159,7 +149,7 @@ public class GiftBoxService {
 
     @Transactional
     public void makeChattingRoom(Long senderId, Long receiverId, Long senderGiftId) {
-        Gift receiverGift = giftService.findGeneralGiftEachOther(senderId, receiverId);
+        Gift receiverGift = giftService.findGiftEachOther(senderId, receiverId);
         if (receiverGift != null) {
             chatRoomService.saveChatRoom(senderId, receiverId, senderGiftId, receiverGift.getId());
         }

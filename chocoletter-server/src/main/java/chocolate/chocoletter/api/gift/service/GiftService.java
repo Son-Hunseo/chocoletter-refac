@@ -2,7 +2,6 @@ package chocolate.chocoletter.api.gift.service;
 
 import chocolate.chocoletter.api.chatroom.service.ChatRoomService;
 import chocolate.chocoletter.api.gift.domain.Gift;
-import chocolate.chocoletter.api.gift.domain.GiftType;
 import chocolate.chocoletter.api.gift.dto.request.ModifyLetterRequestDto;
 import chocolate.chocoletter.api.gift.dto.response.GiftDetailResponseDto;
 import chocolate.chocoletter.api.gift.dto.response.GiftResponseDto;
@@ -47,18 +46,6 @@ public class GiftService {
         return GiftsResponseDto.of(giftResponseDtos);
     }
 
-    public GiftsResponseDto findSpecialGifts(Long memberId) {
-        List<Gift> gifts = giftRepository.findSpecificGift(memberId, GiftType.SPECIAL);
-        List<GiftResponseDto> giftResponseDtos = gifts.stream()
-                .map(gift -> {
-                    String encryptedGiftId = idEncryptionUtil.encrypt(gift.getId());
-                    return GiftResponseDto.of(gift, encryptedGiftId);
-                })
-                .collect(Collectors.toList());
-
-        return GiftsResponseDto.of(giftResponseDtos);
-    }
-
     @Transactional
     public GiftDetailResponseDto findReceiveGiftDetail(Long memberId, Long giftId) {
         Gift gift = giftRepository.findGiftById(giftId);
@@ -81,18 +68,6 @@ public class GiftService {
         return GiftDetailResponseDto.of(encryptedGiftId, letter);
     }
 
-    public GiftsResponseDto findGeneralGifts(Long memberId) {
-        List<Gift> gifts = giftRepository.findSpecificGift(memberId, GiftType.GENERAL);
-        List<GiftResponseDto> giftResponseDtos = gifts.stream()
-                .map(gift -> {
-                    String encryptedGiftId = idEncryptionUtil.encrypt(gift.getId());
-                    return GiftResponseDto.of(gift, encryptedGiftId);
-                })
-                .collect(Collectors.toList());
-
-        return GiftsResponseDto.of(giftResponseDtos);
-    }
-
     @Transactional
     public void saveGift(Gift gift) {
         giftRepository.save(gift);
@@ -102,8 +77,8 @@ public class GiftService {
         return giftRepository.findGiftBySenderIdAndGiftBoxId(senderId, giftBoxId) != null;
     }
 
-    public Gift findGeneralGiftEachOther(Long senderId, Long receiverId) {
-        return giftRepository.findGeneralGiftBySenderIdAndReceiverId(senderId, receiverId, GiftType.GENERAL);
+    public Gift findGiftEachOther(Long senderId, Long receiverId) {
+        return giftRepository.findGiftBySenderIdAndReceiverId(senderId, receiverId);
     }
 
     @Transactional
