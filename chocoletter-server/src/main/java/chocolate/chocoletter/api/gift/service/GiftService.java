@@ -9,6 +9,7 @@ import chocolate.chocoletter.api.gift.dto.response.GiftsResponseDto;
 import chocolate.chocoletter.api.gift.repository.GiftRepository;
 import chocolate.chocoletter.api.giftbox.domain.GiftBox;
 import chocolate.chocoletter.api.giftbox.repository.GiftBoxRepository;
+import chocolate.chocoletter.api.giftletter.service.GiftLetterService;
 import chocolate.chocoletter.api.letter.dto.response.LetterDto;
 import chocolate.chocoletter.api.letter.service.LetterService;
 import chocolate.chocoletter.api.member.domain.Member;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 public class GiftService {
     private final GiftRepository giftRepository;
     private final LetterService letterService;
+    private final GiftLetterService giftLetterService;
     private final ChatRoomService chatRoomService;
     private final MemberService memberService;
     private final IdEncryptionUtil idEncryptionUtil;
@@ -53,6 +55,10 @@ public class GiftService {
             throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
         }
         gift.openGift();
+
+        // 이중 쓰기
+        giftLetterService.openGiftLetter(gift.getSenderId(), gift.getGiftBox().getId());
+
         String encryptedGiftId = idEncryptionUtil.encrypt(gift.getId());
         LetterDto letter = letterService.findLetter(giftId);
         return GiftDetailResponseDto.of(encryptedGiftId, letter);

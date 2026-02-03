@@ -1,6 +1,7 @@
 package chocolate.chocoletter.api.letter.service;
 
 import chocolate.chocoletter.api.gift.dto.request.ModifyLetterRequestDto;
+import chocolate.chocoletter.api.giftletter.service.GiftLetterService;
 import chocolate.chocoletter.api.letter.domain.Letter;
 import chocolate.chocoletter.api.letter.domain.Question;
 import chocolate.chocoletter.api.letter.dto.response.LetterDto;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class LetterService {
     private final LetterRepository letterRepository;
     private final LetterEncryptionUtil letterEncryptionUtil;
+    private final GiftLetterService giftLetterService;
 
     public LetterDto findLetter(Long giftId) {
         Letter letter = letterRepository.findLetterByGiftId(giftId);
@@ -60,5 +62,10 @@ public class LetterService {
         String encryptedContent = letterEncryptionUtil.encrypt(requestDto.content());
         String encryptedAnswer = letterEncryptionUtil.encrypt(requestDto.answer());
         letter.modify(requestDto.nickName(), requestDto.question(), encryptedAnswer, encryptedContent);
+
+        // 이중 쓰기
+        Long senderId = letter.getGift().getSenderId();
+        Long giftBoxId = letter.getGift().getGiftBox().getId();
+        giftLetterService.modifyGiftLetter(senderId, giftBoxId, requestDto);
     }
 }

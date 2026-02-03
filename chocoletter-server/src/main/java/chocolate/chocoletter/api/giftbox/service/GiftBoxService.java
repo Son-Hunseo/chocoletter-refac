@@ -17,6 +17,7 @@ import chocolate.chocoletter.api.giftbox.dto.response.GiftBoxTypeResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftCountResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.VerifyIsSendResponseDto;
 import chocolate.chocoletter.api.giftbox.repository.GiftBoxRepository;
+import chocolate.chocoletter.api.giftletter.service.GiftLetterService;
 import chocolate.chocoletter.api.letter.domain.Letter;
 import chocolate.chocoletter.api.letter.service.LetterService;
 import chocolate.chocoletter.api.member.domain.Member;
@@ -39,6 +40,7 @@ public class GiftBoxService {
     private final GiftBoxRepository giftBoxRepository;
     private final GiftService giftService;
     private final LetterService letterService;
+    private final GiftLetterService giftLetterService;
     private final ChatRoomService chatRoomService;
     private final IdEncryptionUtil idEncryptionUtil;
     private final GiftRepository giftRepository;
@@ -48,6 +50,9 @@ public class GiftBoxService {
         Gift gift = generateGift(senderId, giftBoxId);
         Letter letter = Letter.createGeneralLetter(gift, requestDto.nickName(), requestDto.content());
         letterService.saveLetter(letter);
+
+        // 이중 쓰기
+        giftLetterService.saveGiftLetter(gift, letter);
 
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
@@ -61,6 +66,9 @@ public class GiftBoxService {
                 requestDto.answer());
         letterService.saveLetter(letter);
 
+        // 이중 쓰기
+        giftLetterService.saveGiftLetter(gift, letter);
+
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
         sendMember.increaseSendGiftCount();
@@ -71,6 +79,9 @@ public class GiftBoxService {
         Gift gift = generateGift(senderId, giftBoxId);
         Letter letter = Letter.createGeneralLetter(gift, requestDto.nickName(), requestDto.content());
         letterService.saveLetter(letter);
+
+        // 이중 쓰기
+        giftLetterService.saveGiftLetter(gift, letter);
 
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
@@ -83,6 +94,9 @@ public class GiftBoxService {
         Letter letter = Letter.createQuestionLetter(gift, requestDto.nickName(), requestDto.question(),
                 requestDto.answer());
         letterService.saveLetter(letter);
+
+        // 이중 쓰기
+        giftLetterService.saveGiftLetter(gift, letter);
 
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
