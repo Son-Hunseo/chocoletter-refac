@@ -32,32 +32,35 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
-    if (error.response && error.response.status) {
-      if (error.response.status === 401) {
-        if (error.response.data.message === "reissue") {
-          try {
-            const data = await reissueTokenApi();
-            if (data.status === "success") {
-              window.localStorage.setItem("accessToken", data.data.accessToken);
-              // 토큰 재발급 후 원래 요청을 다시 시도
-              const originalRequest = error.config;
-              originalRequest.headers["Authorization"] = `Bearer ${data.data.accessToken}`;
-              return api(originalRequest);
-            }
-          } catch (reissueError) {
-            console.error("토큰 재발급 중 오류 발생:", reissueError);
-          }
-        } else {
-          deleteUserInfo();
-          toast.error("다시 로그인이 필요합니다.");
-          window.location.replace("/");
-        }
-        // 요청을 취소하여 에러를 전파하지 않도록 함
-        return new Promise(() => {});
-      } else {
-        return Promise.reject(error);
-      }
+    // 네트워크 에러 (CORS 에러, 서버 다운 등) - error.response가 없음
+    if (!error.response) {
+      console.error("네트워크 에러:", error.message);
+      deleteUserInfo();
+      toast.error("세션이 만료되었습니다. 다시 로그인해주세요.");
+      window.location.replace("/");
+      return new Promise(() => {});
     }
+
+    if (error.response.status === 401) {
+      if (error.response.data?.message === "reissue") {
+        try {
+          const data = await reissueTokenApi();
+          if (data.status === "success") {
+            window.localStorage.setItem("accessToken", data.data.accessToken);
+            const originalRequest = error.config;
+            originalRequest.headers["Authorization"] = `Bearer ${data.data.accessToken}`;
+            return api(originalRequest);
+          }
+        } catch (reissueError) {
+          console.error("토큰 재발급 중 오류 발생:", reissueError);
+        }
+      }
+      deleteUserInfo();
+      toast.error("다시 로그인이 필요합니다.");
+      window.location.replace("/");
+      return new Promise(() => {});
+    }
+
     return Promise.reject(error);
   }
 );
