@@ -4,12 +4,6 @@ spring:
       on-profile: prod
     import: optional:file:env/prod.env[.properties]
 
-  batch:
-    job:
-      enabled: false
-    jdbc:
-      initialize-schema: always
-
   # DB
   server:
     tomcat:
