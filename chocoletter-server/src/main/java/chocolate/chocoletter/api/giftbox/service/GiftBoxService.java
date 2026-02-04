@@ -1,25 +1,21 @@
 package chocolate.chocoletter.api.giftbox.service;
 
 import chocolate.chocoletter.api.chatroom.service.ChatRoomService;
-import chocolate.chocoletter.api.gift.domain.Gift;
-import chocolate.chocoletter.api.gift.dto.response.GiftDetailResponseDto;
-import chocolate.chocoletter.api.gift.repository.GiftRepository;
-import chocolate.chocoletter.api.gift.service.GiftService;
 import chocolate.chocoletter.api.giftbox.domain.GiftBox;
-import chocolate.chocoletter.api.giftbox.dto.request.GeneralFreeGiftRequestDto;
-import chocolate.chocoletter.api.giftbox.dto.request.GeneralQuestionRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.GeneralFreeGiftLetterRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.GeneralQuestionGiftLetterRequestDto;
 import chocolate.chocoletter.api.giftbox.dto.request.GiftBoxTypeRequestDto;
-import chocolate.chocoletter.api.giftbox.dto.request.SpecialFreeGiftRequestDto;
-import chocolate.chocoletter.api.giftbox.dto.request.SpecialQuestionGiftRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.SpecialFreeGiftLetterRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.SpecialQuestionGiftLetterRequestDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftBoxIdResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftBoxResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftBoxTypeResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftCountResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.VerifyIsSendResponseDto;
 import chocolate.chocoletter.api.giftbox.repository.GiftBoxRepository;
+import chocolate.chocoletter.api.giftletter.domain.GiftLetter;
+import chocolate.chocoletter.api.giftletter.dto.response.GiftLetterDetailResponseDto;
 import chocolate.chocoletter.api.giftletter.service.GiftLetterService;
-import chocolate.chocoletter.api.letter.domain.Letter;
-import chocolate.chocoletter.api.letter.service.LetterService;
 import chocolate.chocoletter.api.member.domain.Member;
 import chocolate.chocoletter.api.member.repository.MemberRepository;
 import chocolate.chocoletter.common.exception.BadRequestException;
@@ -38,21 +34,14 @@ import org.springframework.stereotype.Service;
 public class GiftBoxService {
     private final MemberRepository memberRepository;
     private final GiftBoxRepository giftBoxRepository;
-    private final GiftService giftService;
-    private final LetterService letterService;
     private final GiftLetterService giftLetterService;
     private final ChatRoomService chatRoomService;
     private final IdEncryptionUtil idEncryptionUtil;
-    private final GiftRepository giftRepository;
 
     @Transactional
-    public void sendGeneralFreeGift(Long senderId, Long giftBoxId, GeneralFreeGiftRequestDto requestDto) {
-        Gift gift = generateGift(senderId, giftBoxId);
-        Letter letter = Letter.createGeneralLetter(gift, requestDto.nickName(), requestDto.content());
-        letterService.saveLetter(letter);
-
-        // 이중 쓰기
-        giftLetterService.saveGiftLetter(gift, letter);
+    public void sendGeneralFreeGiftLetter(Long senderId, Long giftBoxId, GeneralFreeGiftLetterRequestDto requestDto) {
+        GiftBox receiverGiftBox = findGiftBox(giftBoxId);
+        GiftLetter giftLetter = generateGiftLetter(senderId, receiverGiftBox, requestDto.nickName(), requestDto.content(), null, null);
 
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
@@ -60,14 +49,9 @@ public class GiftBoxService {
     }
 
     @Transactional
-    public void sendGeneralQuestionGift(Long senderId, Long giftBoxId, GeneralQuestionRequestDto requestDto) {
-        Gift gift = generateGift(senderId, giftBoxId);
-        Letter letter = Letter.createQuestionLetter(gift, requestDto.nickName(), requestDto.question(),
-                requestDto.answer());
-        letterService.saveLetter(letter);
-
-        // 이중 쓰기
-        giftLetterService.saveGiftLetter(gift, letter);
+    public void sendGeneralQuestionGiftLetter(Long senderId, Long giftBoxId, GeneralQuestionGiftLetterRequestDto requestDto) {
+        GiftBox receiverGiftBox = findGiftBox(giftBoxId);
+        GiftLetter giftLetter = generateQuestionGiftLetter(senderId, receiverGiftBox, requestDto.nickName(), requestDto.question(), requestDto.answer());
 
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
@@ -75,13 +59,9 @@ public class GiftBoxService {
     }
 
     @Transactional
-    public void sendSpecialFreeGift(Long senderId, Long giftBoxId, SpecialFreeGiftRequestDto requestDto) {
-        Gift gift = generateGift(senderId, giftBoxId);
-        Letter letter = Letter.createGeneralLetter(gift, requestDto.nickName(), requestDto.content());
-        letterService.saveLetter(letter);
-
-        // 이중 쓰기
-        giftLetterService.saveGiftLetter(gift, letter);
+    public void sendSpecialFreeGiftLetter(Long senderId, Long giftBoxId, SpecialFreeGiftLetterRequestDto requestDto) {
+        GiftBox receiverGiftBox = findGiftBox(giftBoxId);
+        GiftLetter giftLetter = generateGiftLetter(senderId, receiverGiftBox, requestDto.nickName(), requestDto.content(), null, null);
 
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
@@ -89,14 +69,9 @@ public class GiftBoxService {
     }
 
     @Transactional
-    public void sendSpecialQuestionGift(Long senderId, Long giftBoxId, SpecialQuestionGiftRequestDto requestDto) {
-        Gift gift = generateGift(senderId, giftBoxId);
-        Letter letter = Letter.createQuestionLetter(gift, requestDto.nickName(), requestDto.question(),
-                requestDto.answer());
-        letterService.saveLetter(letter);
-
-        // 이중 쓰기
-        giftLetterService.saveGiftLetter(gift, letter);
+    public void sendSpecialQuestionGiftLetter(Long senderId, Long giftBoxId, SpecialQuestionGiftLetterRequestDto requestDto) {
+        GiftBox receiverGiftBox = findGiftBox(giftBoxId);
+        GiftLetter giftLetter = generateQuestionGiftLetter(senderId, receiverGiftBox, requestDto.nickName(), requestDto.question(), requestDto.answer());
 
         Optional<Member> member = memberRepository.findById(senderId);
         Member sendMember = member.get();
@@ -124,15 +99,31 @@ public class GiftBoxService {
     }
 
     @Transactional
-    public Gift generateGift(Long senderId, Long giftBoxId) {
-        checkGiftExists(senderId, giftBoxId);
-        GiftBox receiverGiftBox = findGiftBox(giftBoxId);
-        Gift gift = Gift.createGift(receiverGiftBox, senderId, receiverGiftBox.getMember().getId());
-        giftService.saveGift(gift);
-        makeChattingRoom(gift.getReceiverId(), gift.getSenderId(), gift.getId());
+    public GiftLetter generateGiftLetter(Long senderId, GiftBox receiverGiftBox, String nickname, String content, String question, String answer) {
+        checkGiftLetterExists(senderId, receiverGiftBox.getId());
+        Long receiverId = receiverGiftBox.getMember().getId();
+
+        GiftLetter giftLetter = giftLetterService.createGeneralFreeGiftLetter(
+                receiverGiftBox, senderId, receiverId, nickname, content);
+
+        makeChattingRoom(receiverId, senderId, giftLetter.getId());
         receiverGiftBox.addGiftCount();
         receiverGiftBox.addGeneralGiftCount();
-        return gift;
+        return giftLetter;
+    }
+
+    @Transactional
+    public GiftLetter generateQuestionGiftLetter(Long senderId, GiftBox receiverGiftBox, String nickname, String question, String answer) {
+        checkGiftLetterExists(senderId, receiverGiftBox.getId());
+        Long receiverId = receiverGiftBox.getMember().getId();
+
+        GiftLetter giftLetter = giftLetterService.createQuestionGiftLetter(
+                receiverGiftBox, senderId, receiverId, nickname, question, answer);
+
+        makeChattingRoom(receiverId, senderId, giftLetter.getId());
+        receiverGiftBox.addGiftCount();
+        receiverGiftBox.addGeneralGiftCount();
+        return giftLetter;
     }
 
     public GiftBoxIdResponseDto findGiftBoxIdByMemberId(Long memberId) {
@@ -155,35 +146,36 @@ public class GiftBoxService {
         return receiverGiftBox;
     }
 
-    private void checkGiftExists(Long senderId, Long giftBoxId) {
-        if (giftService.findMyGift(senderId, giftBoxId)) {
+    private void checkGiftLetterExists(Long senderId, Long giftBoxId) {
+        if (giftLetterService.existsBySenderIdAndGiftBoxId(senderId, giftBoxId)) {
             throw new BadRequestException(ErrorMessage.ERR_ALREADY_EXISTS_GIFT);
         }
     }
 
     @Transactional
-    public void makeChattingRoom(Long senderId, Long receiverId, Long senderGiftId) {
-        Gift receiverGift = giftService.findGiftEachOther(senderId, receiverId);
-        if (receiverGift != null) {
-            chatRoomService.saveChatRoom(senderId, receiverId, senderGiftId, receiverGift.getId());
+    public void makeChattingRoom(Long receiverId, Long senderId, Long senderGiftLetterId) {
+        GiftLetter receiverGiftLetter = giftLetterService.findBySenderAndReceiver(receiverId, senderId);
+        if (receiverGiftLetter != null) {
+            chatRoomService.saveChatRoom(receiverId, senderId, senderGiftLetterId, receiverGiftLetter.getId());
         }
     }
 
     @Transactional
     public VerifyIsSendResponseDto findVerifyIsSend(Long giftBoxId, Long memberId) {
-        boolean isSend = giftRepository.findGiftBySenderIdAndGiftBoxId(memberId, giftBoxId) != null;
+        boolean isSend = giftLetterService.existsBySenderIdAndGiftBoxId(memberId, giftBoxId);
         return VerifyIsSendResponseDto.of(isSend);
     }
 
-    public GiftDetailResponseDto findMyGiftDetail(Long giftBoxId, Long memberId) {
-        Gift myGift = giftService.findMyGiftDetail(giftBoxId, memberId);
-        if (myGift == null) {
+    public GiftLetterDetailResponseDto findMyGiftLetterDetail(Long giftBoxId, Long memberId) {
+        GiftLetter myGiftLetter = giftLetterService.findBySenderAndReceiver(memberId,
+                findGiftBox(giftBoxId).getMember().getId());
+        if (myGiftLetter == null) {
             throw new NotFoundException(ErrorMessage.ERR_NOT_FOUND_GIFT);
         }
-        if (myGift.getIsOpened()) {
+        if (myGiftLetter.getIsOpened()) {
             throw new BadRequestException(ErrorMessage.ERR_GIFT_ALREADY_OPENED);
         }
-        return giftService.findSendGiftDetail(memberId, myGift.getId());
+        return giftLetterService.findSendGiftLetterDetail(memberId, myGiftLetter.getId());
     }
 
     @Transactional

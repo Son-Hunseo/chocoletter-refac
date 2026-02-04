@@ -1,4 +1,4 @@
-package chocolate.chocoletter.api.letter.domain;
+package chocolate.chocoletter.api.giftletter.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
