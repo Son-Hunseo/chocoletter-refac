@@ -1,13 +1,13 @@
 package chocolate.chocoletter.api.giftbox.controller;
 
-import chocolate.chocoletter.api.gift.dto.response.GiftDetailResponseDto;
-import chocolate.chocoletter.api.giftbox.dto.request.GeneralFreeGiftRequestDto;
-import chocolate.chocoletter.api.giftbox.dto.request.GeneralQuestionRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.GeneralFreeGiftLetterRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.GeneralQuestionGiftLetterRequestDto;
 import chocolate.chocoletter.api.giftbox.dto.request.GiftBoxTypeRequestDto;
-import chocolate.chocoletter.api.giftbox.dto.request.SpecialFreeGiftRequestDto;
-import chocolate.chocoletter.api.giftbox.dto.request.SpecialQuestionGiftRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.SpecialFreeGiftLetterRequestDto;
+import chocolate.chocoletter.api.giftbox.dto.request.SpecialQuestionGiftLetterRequestDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftCountResponseDto;
 import chocolate.chocoletter.api.giftbox.service.GiftBoxService;
+import chocolate.chocoletter.api.giftletter.dto.response.GiftLetterDetailResponseDto;
 import chocolate.chocoletter.common.annotation.DecryptedId;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -28,39 +28,39 @@ import org.springframework.web.bind.annotation.RestController;
 public class GiftBoxController implements GiftBoxSwagger {
     private final GiftBoxService giftBoxService;
 
-    @PostMapping("/{giftBoxId}/gift/general/free")
-    public ResponseEntity<?> sendGeneralFreeGift(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
-                                                 @Valid @RequestBody
-                                                 GeneralFreeGiftRequestDto requestDto, Principal principal) {
+    @PostMapping("/{giftBoxId}/giftletter/general/free")
+    public ResponseEntity<?> sendGeneralFreeGiftLetter(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
+                                                        @Valid @RequestBody
+                                                        GeneralFreeGiftLetterRequestDto requestDto, Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
-        giftBoxService.sendGeneralFreeGift(memberId, giftBoxId, requestDto);
+        giftBoxService.sendGeneralFreeGiftLetter(memberId, giftBoxId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/{giftBoxId}/gift/general/question")
-    public ResponseEntity<?> sendGeneralQuestionGift(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
-                                                     @Valid @RequestBody
-                                                     GeneralQuestionRequestDto requestDto, Principal principal) {
+    @PostMapping("/{giftBoxId}/giftletter/general/question")
+    public ResponseEntity<?> sendGeneralQuestionGiftLetter(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
+                                                            @Valid @RequestBody
+                                                            GeneralQuestionGiftLetterRequestDto requestDto, Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
-        giftBoxService.sendGeneralQuestionGift(memberId, giftBoxId, requestDto);
+        giftBoxService.sendGeneralQuestionGiftLetter(memberId, giftBoxId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/{giftBoxId}/gift/special/free")
-    public ResponseEntity<?> sendSpecialFreeGift(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
-                                                 @Valid @RequestBody
-                                                 SpecialFreeGiftRequestDto requestDto, Principal principal) {
+    @PostMapping("/{giftBoxId}/giftletter/special/free")
+    public ResponseEntity<?> sendSpecialFreeGiftLetter(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
+                                                        @Valid @RequestBody
+                                                        SpecialFreeGiftLetterRequestDto requestDto, Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
-        giftBoxService.sendSpecialFreeGift(memberId, giftBoxId, requestDto);
+        giftBoxService.sendSpecialFreeGiftLetter(memberId, giftBoxId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/{giftBoxId}/gift/special/question")
-    public ResponseEntity<?> sendSpecialQuestionGift(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
-                                                     @Valid @RequestBody
-                                                     SpecialQuestionGiftRequestDto requestDto, Principal principal) {
+    @PostMapping("/{giftBoxId}/giftletter/special/question")
+    public ResponseEntity<?> sendSpecialQuestionGiftLetter(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
+                                                            @Valid @RequestBody
+                                                            SpecialQuestionGiftLetterRequestDto requestDto, Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
-        giftBoxService.sendSpecialQuestionGift(memberId, giftBoxId, requestDto);
+        giftBoxService.sendSpecialQuestionGiftLetter(memberId, giftBoxId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -83,12 +83,12 @@ public class GiftBoxController implements GiftBoxSwagger {
         return ResponseEntity.ok(giftBoxService.findFriendGiftBox(giftBoxId));
     }
 
-    @GetMapping("/{giftBoxId}/sent-letter")
-    public ResponseEntity<?> findMyGiftDetail(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
-                                              Principal principal) {
+    @GetMapping("/{giftBoxId}/sent-giftletter")
+    public ResponseEntity<?> findMyGiftLetterDetail(@DecryptedId @PathVariable("giftBoxId") Long giftBoxId,
+                                                     Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
-        GiftDetailResponseDto myGiftDetail = giftBoxService.findMyGiftDetail(giftBoxId, memberId);
-        return ResponseEntity.ok(myGiftDetail);
+        GiftLetterDetailResponseDto myGiftLetterDetail = giftBoxService.findMyGiftLetterDetail(giftBoxId, memberId);
+        return ResponseEntity.ok(myGiftLetterDetail);
     }
 
     @GetMapping("/id")

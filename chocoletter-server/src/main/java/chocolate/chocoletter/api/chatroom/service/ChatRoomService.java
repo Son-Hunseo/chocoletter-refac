@@ -5,9 +5,8 @@ import chocolate.chocoletter.api.chatroom.dto.response.ChatLetterResponseDto;
 import chocolate.chocoletter.api.chatroom.dto.response.ChatRoomResponseDto;
 import chocolate.chocoletter.api.chatroom.dto.response.ChatRoomsResponseDto;
 import chocolate.chocoletter.api.chatroom.repository.ChatRoomRepository;
-import chocolate.chocoletter.api.gift.domain.Gift;
-import chocolate.chocoletter.api.gift.repository.GiftRepository;
-import chocolate.chocoletter.api.letter.service.LetterService;
+import chocolate.chocoletter.api.giftletter.domain.GiftLetter;
+import chocolate.chocoletter.api.giftletter.service.GiftLetterService;
 import chocolate.chocoletter.common.util.IdEncryptionUtil;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,16 +19,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
-    private final GiftRepository giftRepository;
-    private final LetterService letterService;
+    private final GiftLetterService giftLetterService;
     private final IdEncryptionUtil idEncryptionUtil;
 
-    public void saveChatRoom(Long hostId, Long guestId, Long hostGiftId, Long guestGiftId) {
+    public void saveChatRoom(Long hostId, Long guestId, Long hostGiftLetterId, Long guestGiftLetterId) {
         chatRoomRepository.save(ChatRoom.builder()
                 .hostId(hostId)
                 .guestId(guestId)
-                .hostGiftId(hostGiftId)
-                .guestGiftId(guestGiftId)
+                .hostGiftId(hostGiftLetterId)
+                .guestGiftId(guestGiftLetterId)
                 .build());
     }
 
@@ -37,13 +35,15 @@ public class ChatRoomService {
         List<ChatRoomResponseDto> chatRooms = chatRoomRepository.findMyChatRooms(memberId)
                 .stream()
                 .map(chatRoom -> {
-                    Gift guestGift = giftRepository.findGiftByIdOrThrow(chatRoom.getGuestGiftId());
-                    Long receiverId = guestGift.getReceiverId();
+                    GiftLetter guestGiftLetter = giftLetterService.findById(chatRoom.getGuestGiftId());
+                    Long receiverId = guestGiftLetter.getReceiverId();
                     String nickname;
                     if (receiverId.equals(memberId)) {
-                        nickname = letterService.findNickNameByGiftId(guestGift.getId());
+                        // 내가 받은 선물이므로 guestGiftLetter의 nickname 사용
+                        nickname = guestGiftLetter.getNickname();
                     } else {
-                        nickname = letterService.findNickNameByGiftId(chatRoom.getHostGiftId());
+                        // 내가 보낸 선물이므로 hostGiftLetter의 nickname 조회
+                        nickname = giftLetterService.findNicknameById(chatRoom.getHostGiftId());
                     }
                     return ChatRoomResponseDto.of(idEncryptionUtil.encrypt(chatRoom.getId()), nickname);
                 })
@@ -54,11 +54,13 @@ public class ChatRoomService {
 
     public ChatLetterResponseDto findReceiveLetter(Long roomId, Long memberId) {
         ChatRoom chatRoom = chatRoomRepository.findChatRoom(roomId);
-        Gift hostGift = giftRepository.findGiftByIdOrThrow(chatRoom.getHostGiftId());
-        if (hostGift.getReceiverId().equals(memberId)) {
-            return ChatLetterResponseDto.of(letterService.findLetter(chatRoom.getHostGiftId()));
+        GiftLetter hostGiftLetter = giftLetterService.findById(chatRoom.getHostGiftId());
+        if (hostGiftLetter.getReceiverId().equals(memberId)) {
+            // 이미 조회한 hostGiftLetter 재사용
+            return ChatLetterResponseDto.of(giftLetterService.toGiftLetterDetailResponseDto(hostGiftLetter));
         } else {
-            return ChatLetterResponseDto.of(letterService.findLetter(chatRoom.getGuestGiftId()));
+            GiftLetter guestGiftLetter = giftLetterService.findById(chatRoom.getGuestGiftId());
+            return ChatLetterResponseDto.of(giftLetterService.toGiftLetterDetailResponseDto(guestGiftLetter));
         }
     }
 }

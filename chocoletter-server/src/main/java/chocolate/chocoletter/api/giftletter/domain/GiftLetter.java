@@ -1,7 +1,7 @@
 package chocolate.chocoletter.api.giftletter.domain;
 
 import chocolate.chocoletter.api.giftbox.domain.GiftBox;
-import chocolate.chocoletter.api.letter.domain.LetterType;
+import chocolate.chocoletter.api.giftletter.domain.LetterType;
 import chocolate.chocoletter.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

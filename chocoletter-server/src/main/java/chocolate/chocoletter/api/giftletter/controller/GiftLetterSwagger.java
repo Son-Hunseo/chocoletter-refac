@@ -1,19 +1,23 @@
-package chocolate.chocoletter.api.gift.controller;
+package chocolate.chocoletter.api.giftletter.controller;
 
-import chocolate.chocoletter.api.gift.dto.request.ModifyLetterRequestDto;
-import chocolate.chocoletter.api.gift.dto.response.GiftDetailResponseDto;
-import chocolate.chocoletter.api.gift.dto.response.GiftsResponseDto;
+import chocolate.chocoletter.api.giftletter.dto.request.ModifyGiftLetterRequestDto;
+import chocolate.chocoletter.api.giftletter.dto.response.GiftLetterDetailResponseDto;
+import chocolate.chocoletter.api.giftletter.dto.response.GiftLettersResponseDto;
+import chocolate.chocoletter.api.giftletter.dto.response.RandomQuestionResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.security.Principal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
-public interface GiftSwagger {
+public interface GiftLetterSwagger {
 
     @Operation(
             summary = "전체 선물 목록 조회",
@@ -26,13 +30,13 @@ public interface GiftSwagger {
                             description = "성공적으로 조회",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = GiftsResponseDto.class)
+                                    schema = @Schema(implementation = GiftLettersResponseDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             }
     )
-    ResponseEntity<?> findAllGifts(Principal principal);
+    ResponseEntity<?> findAllGiftLetters(Principal principal);
 
     @Operation(
             summary = "내가 받은 개별 선물 조회",
@@ -45,17 +49,17 @@ public interface GiftSwagger {
                             description = "성공적으로 조회",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = GiftDetailResponseDto.class)
+                                    schema = @Schema(implementation = GiftLetterDetailResponseDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             }
     )
-    ResponseEntity<?> findReceiveGiftDetail(
+    ResponseEntity<?> findReceiveGiftLetterDetail(
             @Parameter(
-                    description = "암호화된 형태의 giftId (String 타입으로 전달)",
+                    description = "암호화된 형태의 giftLetterId (String 타입으로 전달)",
                     schema = @Schema(type = "string")
-            ) Long giftId, Principal principal);
+            ) Long giftLetterId, Principal principal);
 
     @Operation(
             summary = "내가 보낸 개별 선물 조회",
@@ -68,13 +72,13 @@ public interface GiftSwagger {
                             description = "성공적으로 조회",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = GiftDetailResponseDto.class)
+                                    schema = @Schema(implementation = GiftLetterDetailResponseDto.class)
                             )
                     ),
                     @ApiResponse(responseCode = "401", description = "인증 실패")
             }
     )
-    ResponseEntity<?> findSendGiftDetail(Long giftId, Principal principal);
+    ResponseEntity<?> findSendGiftLetterDetail(Long giftLetterId, Principal principal);
 
     @Operation(
             summary = "편지 수정",
@@ -93,18 +97,39 @@ public interface GiftSwagger {
                     @ApiResponse(responseCode = "404", description = "해당하는 선물이 없습니다.")
             }
     )
-    public ResponseEntity<?> modifyGift(
+    ResponseEntity<?> modifyGiftLetter(
             @Parameter(
-                    description = "암호화된 형태의 giftId (String 타입으로 전달)",
+                    description = "암호화된 형태의 giftLetterId (String 타입으로 전달)",
                     schema = @Schema(type = "string")
-            ) Long giftId,
+            ) Long giftLetterId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "변경할 편지 내용",
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ModifyLetterRequestDto.class)
+                            schema = @Schema(implementation = ModifyGiftLetterRequestDto.class)
                     )
             )
-            @RequestBody ModifyLetterRequestDto requestDto, Principal principal);
+            @RequestBody ModifyGiftLetterRequestDto requestDto, Principal principal);
+
+    @Operation(
+            summary = "랜덤 질문 조회",
+            description = "랜덤 편지를 골랐을 때나 질문이 마음에 들지 않을 때, 질문을 조회합니다.")
+    @ApiResponses(
+            value = {@ApiResponse(
+                    responseCode = "200",
+                    description = "성공적으로 조회",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = RandomQuestionResponseDto.class))),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "인증 실패")
+            })
+    ResponseEntity<?> findRandomQuestion(
+            @Parameter(
+                    description = "이전 질문 id, 처음 조회 시에는 해당 파라미터를 0으로 주고, 새로고침 시에는 이전 id를 주면 됩니다.",
+                    required = true,
+                    example = "1"
+            ) @RequestParam @Min(0) @Max(40) Long previousQuestionId);
 }
