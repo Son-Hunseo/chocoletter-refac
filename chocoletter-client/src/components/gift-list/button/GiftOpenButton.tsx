@@ -19,7 +19,7 @@ const generalChocos = Object.values(generalImages).map(
 );
 
 interface GiftOpenButtonProps {
-	giftId: string;
+	giftLetterId: string;
 	isOpened: boolean;
 	onRefresh: () => void;
 }
@@ -47,7 +47,7 @@ const compareDates = (current: Date, eventday: Date) => {
 };
 
 export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
-	giftId,
+	giftLetterId,
 	isOpened,
 	onRefresh,
 }) => {
@@ -60,7 +60,7 @@ export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
 
 	// localStorage에서 이미지 로드
 	useEffect(() => {
-		const savedImage = localStorage.getItem(`giftImage_${giftId}`);
+		const savedImage = localStorage.getItem(`giftImage_${giftLetterId}`);
 		if (savedImage) {
 			setButtonImage(savedImage);
 		} else {
@@ -68,9 +68,9 @@ export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
 				generalChocos[Math.floor(Math.random() * generalChocos.length)];
 
 			setButtonImage(chocoRandomImage);
-			localStorage.setItem(`giftImage_${giftId}`, chocoRandomImage);
+			localStorage.setItem(`giftImage_${giftLetterId}`, chocoRandomImage);
 		}
-		console.log(giftId, savedImage);
+		console.log(giftLetterId, savedImage);
 	}, []);
 
 	const closeGeneralModal = () => {
@@ -79,7 +79,7 @@ export const GiftOpenButton: React.FC<GiftOpenButtonProps> = ({
 
 	// 버튼 onClick 메서드
 	const giftOpenButtonClickHandler = async () => {
-		setAtomGiftId(giftId);
+		setAtomGiftId(giftLetterId);
 		if (isOpened || compareDates(currentDate, getEventDate())) {
 			navigate("/letter");
 		} else {
