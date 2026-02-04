@@ -1,9 +1,6 @@
 package chocolate.chocoletter.api.giftletter.service;
 
-import chocolate.chocoletter.api.chatroom.domain.ChatRoom;
-import chocolate.chocoletter.api.chatroom.repository.ChatRoomRepository;
 import chocolate.chocoletter.api.giftbox.domain.GiftBox;
-import chocolate.chocoletter.api.giftbox.repository.GiftBoxRepository;
 import chocolate.chocoletter.api.giftletter.domain.GiftLetter;
 import chocolate.chocoletter.api.giftletter.domain.Question;
 import chocolate.chocoletter.api.giftletter.dto.request.FreeGiftLetterRequestDto;
@@ -16,8 +13,10 @@ import chocolate.chocoletter.api.giftletter.dto.response.RandomQuestionResponseD
 import chocolate.chocoletter.api.giftletter.dto.response.VerifyIsSendResponseDto;
 import chocolate.chocoletter.api.giftletter.repository.GiftLetterRepository;
 import chocolate.chocoletter.api.giftletter.repository.QuestionRepository;
-import chocolate.chocoletter.api.member.domain.Member;
-import chocolate.chocoletter.api.member.repository.MemberRepository;
+import chocolate.chocoletter.common.event.chatroom.ChatRoomCreateEvent;
+import chocolate.chocoletter.common.event.giftbox.GiftBoxCountIncrementEvent;
+import chocolate.chocoletter.common.event.giftbox.GiftBoxQuery;
+import chocolate.chocoletter.common.event.member.MemberSendCountIncrementEvent;
 import chocolate.chocoletter.common.exception.BadRequestException;
 import chocolate.chocoletter.common.exception.ErrorMessage;
 import chocolate.chocoletter.common.exception.ForbiddenException;
@@ -29,6 +28,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,9 +39,7 @@ public class GiftLetterService {
     private final GiftLetterRepository giftLetterRepository;
     private final QuestionRepository questionRepository;
 
-    private final GiftBoxRepository giftBoxRepository;
-    private final MemberRepository memberRepository;
-    private final ChatRoomRepository chatRoomRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final LetterEncryptionUtil letterEncryptionUtil;
     private final IdEncryptionUtil idEncryptionUtil;
@@ -105,7 +103,9 @@ public class GiftLetterService {
 
     @Transactional
     public void sendFreeGiftLetter(Long senderId, Long giftBoxId, FreeGiftLetterRequestDto requestDto) {
-        GiftBox receiverGiftBox = giftBoxRepository.findGiftBoxByGiftBoxId(giftBoxId);
+        GiftBoxQuery giftBoxQuery = new GiftBoxQuery(giftBoxId);
+        eventPublisher.publishEvent(giftBoxQuery);
+        GiftBox receiverGiftBox = giftBoxQuery.getResult();
         if (receiverGiftBox == null) {
             throw new NotFoundException(ErrorMessage.ERR_NOT_FOUND_GIFT_BOX);
         }
@@ -122,24 +122,19 @@ public class GiftLetterService {
 
         GiftLetter receiverGiftLetter = giftLetterRepository.findBySenderIdAndReceiverId(receiverId, senderId).orElse(null);
         if (receiverGiftLetter != null) {
-            chatRoomRepository.save(ChatRoom.builder()
-                    .hostId(receiverId)
-                    .guestId(senderId)
-                    .hostGiftId(giftLetter.getId())
-                    .guestGiftId(receiverGiftLetter.getId())
-                    .build());
+            eventPublisher.publishEvent(new ChatRoomCreateEvent(
+                    receiverId, senderId, giftLetter.getId(), receiverGiftLetter.getId()));
         }
 
-        receiverGiftBox.addGiftCount();
-
-        Member sender = memberRepository.findById(senderId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.ERR_NOT_FOUND_USER));
-        sender.increaseSendGiftCount();
+        eventPublisher.publishEvent(new GiftBoxCountIncrementEvent(giftBoxId));
+        eventPublisher.publishEvent(new MemberSendCountIncrementEvent(senderId));
     }
 
     @Transactional
     public void sendQuestionGiftLetter(Long senderId, Long giftBoxId, QuestionGiftLetterRequestDto requestDto) {
-        GiftBox receiverGiftBox = giftBoxRepository.findGiftBoxByGiftBoxId(giftBoxId);
+        GiftBoxQuery giftBoxQuery = new GiftBoxQuery(giftBoxId);
+        eventPublisher.publishEvent(giftBoxQuery);
+        GiftBox receiverGiftBox = giftBoxQuery.getResult();
         if (receiverGiftBox == null) {
             throw new NotFoundException(ErrorMessage.ERR_NOT_FOUND_GIFT_BOX);
         }
@@ -156,19 +151,12 @@ public class GiftLetterService {
 
         GiftLetter receiverGiftLetter = giftLetterRepository.findBySenderIdAndReceiverId(receiverId, senderId).orElse(null);
         if (receiverGiftLetter != null) {
-            chatRoomRepository.save(ChatRoom.builder()
-                    .hostId(receiverId)
-                    .guestId(senderId)
-                    .hostGiftId(giftLetter.getId())
-                    .guestGiftId(receiverGiftLetter.getId())
-                    .build());
+            eventPublisher.publishEvent(new ChatRoomCreateEvent(
+                    receiverId, senderId, giftLetter.getId(), receiverGiftLetter.getId()));
         }
 
-        receiverGiftBox.addGiftCount();
-
-        Member sender = memberRepository.findById(senderId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.ERR_NOT_FOUND_USER));
-        sender.increaseSendGiftCount();
+        eventPublisher.publishEvent(new GiftBoxCountIncrementEvent(giftBoxId));
+        eventPublisher.publishEvent(new MemberSendCountIncrementEvent(senderId));
     }
 
     /**

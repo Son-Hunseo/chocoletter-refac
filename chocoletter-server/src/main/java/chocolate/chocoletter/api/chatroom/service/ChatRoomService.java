@@ -7,13 +7,15 @@ import chocolate.chocoletter.api.chatroom.dto.response.ChatRoomsResponseDto;
 import chocolate.chocoletter.api.chatroom.repository.ChatRoomRepository;
 import chocolate.chocoletter.api.giftletter.domain.GiftLetter;
 import chocolate.chocoletter.api.giftletter.dto.response.GiftLetterDetailResponseDto;
-import chocolate.chocoletter.api.giftletter.repository.GiftLetterRepository;
+import chocolate.chocoletter.common.event.giftletter.GiftLetterEntityQuery;
+import chocolate.chocoletter.common.event.giftletter.GiftLetterQuery;
 import chocolate.chocoletter.common.util.IdEncryptionUtil;
 import chocolate.chocoletter.common.util.LetterEncryptionUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +23,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
-    private final GiftLetterRepository giftLetterRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final IdEncryptionUtil idEncryptionUtil;
     private final LetterEncryptionUtil letterEncryptionUtil;
 
@@ -29,13 +31,16 @@ public class ChatRoomService {
         List<ChatRoomResponseDto> chatRooms = chatRoomRepository.findMyChatRooms(memberId)
                 .stream()
                 .map(chatRoom -> {
-                    GiftLetter guestGiftLetter = giftLetterRepository.findByIdOrThrow(chatRoom.getGuestGiftId());
-                    Long receiverId = guestGiftLetter.getReceiverId();
+                    GiftLetterQuery guestQuery = new GiftLetterQuery(chatRoom.getGuestGiftId());
+                    eventPublisher.publishEvent(guestQuery);
+                    Long receiverId = guestQuery.getReceiverId();
                     String nickname;
                     if (receiverId.equals(memberId)) {
-                        nickname = guestGiftLetter.getNickname();
+                        nickname = guestQuery.getNickname();
                     } else {
-                        nickname = giftLetterRepository.findNicknameById(chatRoom.getHostGiftId());
+                        GiftLetterQuery hostQuery = new GiftLetterQuery(chatRoom.getHostGiftId());
+                        eventPublisher.publishEvent(hostQuery);
+                        nickname = hostQuery.getNickname();
                     }
                     return ChatRoomResponseDto.of(idEncryptionUtil.encrypt(chatRoom.getId()), nickname);
                 })
@@ -45,14 +50,21 @@ public class ChatRoomService {
 
     public ChatLetterResponseDto findReceiveLetter(Long roomId, Long memberId) {
         ChatRoom chatRoom = chatRoomRepository.findChatRoom(roomId);
-        GiftLetter hostGiftLetter = giftLetterRepository.findByIdOrThrow(chatRoom.getHostGiftId());
+
+        GiftLetterEntityQuery hostQuery = new GiftLetterEntityQuery(chatRoom.getHostGiftId());
+        eventPublisher.publishEvent(hostQuery);
+        GiftLetter hostGiftLetter = hostQuery.getResult();
+
         if (hostGiftLetter.getReceiverId().equals(memberId)) {
             String encryptedGiftLetterId = idEncryptionUtil.encrypt(hostGiftLetter.getId());
             String decryptedContent = letterEncryptionUtil.decrypt(hostGiftLetter.getContent());
             String decryptedAnswer = letterEncryptionUtil.decrypt(hostGiftLetter.getAnswer());
             return ChatLetterResponseDto.of(GiftLetterDetailResponseDto.of(encryptedGiftLetterId, hostGiftLetter, decryptedContent, decryptedAnswer));
         } else {
-            GiftLetter guestGiftLetter = giftLetterRepository.findByIdOrThrow(chatRoom.getGuestGiftId());
+            GiftLetterEntityQuery guestQuery = new GiftLetterEntityQuery(chatRoom.getGuestGiftId());
+            eventPublisher.publishEvent(guestQuery);
+            GiftLetter guestGiftLetter = guestQuery.getResult();
+
             String encryptedGiftLetterId = idEncryptionUtil.encrypt(guestGiftLetter.getId());
             String decryptedContent = letterEncryptionUtil.decrypt(guestGiftLetter.getContent());
             String decryptedAnswer = letterEncryptionUtil.decrypt(guestGiftLetter.getAnswer());

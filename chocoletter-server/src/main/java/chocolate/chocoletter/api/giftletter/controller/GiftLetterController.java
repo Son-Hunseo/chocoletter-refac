@@ -9,14 +9,10 @@ import chocolate.chocoletter.api.giftletter.dto.response.RandomQuestionResponseD
 import chocolate.chocoletter.api.giftletter.dto.response.VerifyIsSendResponseDto;
 import chocolate.chocoletter.api.giftletter.service.GiftLetterService;
 import chocolate.chocoletter.common.annotation.DecryptedId;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Validated
 @RestController
 @RequestMapping("/api/v1/giftletter")
 @RequiredArgsConstructor
@@ -74,7 +69,7 @@ public class GiftLetterController implements GiftLetterSwagger {
 
     @PostMapping("/free")
     public ResponseEntity<?> sendFreeGiftLetter(@DecryptedId @RequestParam("giftBoxId") Long giftBoxId,
-                                                 @Valid @RequestBody FreeGiftLetterRequestDto requestDto,
+                                                 @RequestBody FreeGiftLetterRequestDto requestDto,
                                                  Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
         giftLetterService.sendFreeGiftLetter(memberId, giftBoxId, requestDto);
@@ -83,7 +78,7 @@ public class GiftLetterController implements GiftLetterSwagger {
 
     @PostMapping("/question")
     public ResponseEntity<?> sendQuestionGiftLetter(@DecryptedId @RequestParam("giftBoxId") Long giftBoxId,
-                                                     @Valid @RequestBody QuestionGiftLetterRequestDto requestDto,
+                                                     @RequestBody QuestionGiftLetterRequestDto requestDto,
                                                      Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
         giftLetterService.sendQuestionGiftLetter(memberId, giftBoxId, requestDto);
@@ -120,7 +115,7 @@ public class GiftLetterController implements GiftLetterSwagger {
      */
 
     @GetMapping("/question")
-    public ResponseEntity<?> findRandomQuestion(@RequestParam @Min(0) @Max(40) Long previousQuestionId) {
+    public ResponseEntity<?> findRandomQuestion(@RequestParam Long previousQuestionId) {
         RandomQuestionResponseDto randomQuestion = giftLetterService.findRandomQuestion(previousQuestionId);
         return ResponseEntity.ok(randomQuestion);
     }

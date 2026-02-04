@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -110,7 +111,7 @@ public interface GiftBoxSwagger {
                             schema = @Schema(implementation = GiftBoxTypeRequestDto.class)
                     )
             )
-            @RequestBody GiftBoxTypeRequestDto requestDto,
+            @Valid @RequestBody GiftBoxTypeRequestDto requestDto,
             Principal principal
     );
 
