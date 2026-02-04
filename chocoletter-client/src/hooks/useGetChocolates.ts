@@ -11,7 +11,7 @@ export const useFetchChocolates = (refresh: boolean) => {
             try {
                 const chocolates = await getGiftList();
                 console.log("is in" ,chocolates)
-                setData(chocolates?.gifts || []);
+                setData(chocolates?.giftLetters || []);
             } catch (error) {
                 console.error("Error fetching chocolates:", error);
             } finally {

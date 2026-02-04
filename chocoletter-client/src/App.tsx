@@ -2,7 +2,6 @@ import "./styles/App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LoginView from "./pages/LoginView";
 import ErrorPage from "./pages/ErrorPage";
-import ReceiveView from "./pages/ReceiveView";
 import LetterView from "./pages/LetterView";
 import SelectLetterTypeView from "./pages/SelectLetterTypeView";
 import WriteGeneralLetterView from "./pages/WriteGeneralLetterView";
@@ -52,7 +51,6 @@ function App() {
               <Route path="/main/my/before" element={<MainMyBeforeView />} />
               <Route path="/main/your/event" element={<MainYourEventView />} />
 
-              <Route path="/receive/:giftId" element={<ReceiveView />} />
               <Route path="/letter" element={<LetterView />} />
               <Route path="/select-letter" element={<SelectLetterTypeView />} />
               <Route path="/select-letter/:giftBoxId" element={<SelectLetterTypeView />} />

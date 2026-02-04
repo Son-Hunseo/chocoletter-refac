@@ -33,8 +33,8 @@ export const GiftList: React.FC = () => {
 			>
 				{localChocolates.map((chocolate) => (
 					<GiftOpenButton
-						key={chocolate.giftId}
-						giftId={chocolate.giftId}
+						key={chocolate.giftLetterId}
+						giftLetterId={chocolate.giftLetterId}
 						isOpened={chocolate.isOpened}
 						onRefresh={onChange}
 					/>

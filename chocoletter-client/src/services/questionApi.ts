@@ -4,7 +4,7 @@ import api from "./api";
 let previousQuestionId = 0; // 처음 요청 시 0으로 설정
 export async function getQuestion() {
     try {
-        const res = await api.get(`/api/v1/letter/question`, {
+        const res = await api.get(`/api/v1/giftletter/question`, {
             params: {
                 previousQuestionId: previousQuestionId, // 쿼리 파라미터 추가
             },

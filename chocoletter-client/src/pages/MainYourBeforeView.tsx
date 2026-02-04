@@ -148,12 +148,12 @@ const MainYourBeforeView: React.FC = () => {
 			if (sentLetterData.type == "FREE") {
 				// 자유 편지인 경우
 				navigate(
-					`/modify/general/${giftBoxId}?giftId=${sentLetterData.giftId}`
+					`/modify/general/${giftBoxId}?giftLetterId=${sentLetterData.giftLetterId}`
 				);
 			} else {
 				// 질문 편지인 경우
 				navigate(
-					`/modify/question/${giftBoxId}?giftId=${sentLetterData.giftId}`
+					`/modify/question/${giftBoxId}?giftLetterId=${sentLetterData.giftLetterId}`
 				);
 			}
 		} catch (error: any) {

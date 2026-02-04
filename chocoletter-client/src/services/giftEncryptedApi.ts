@@ -13,9 +13,11 @@ export async function sendGeneralFreeGift(
   content: string
 ) {
   try {
-    const res = await api.post(`/api/v1/gift-box/${giftBoxId}/gift/general/free`, {
+    const res = await api.post(`/api/v1/giftletter/free`, {
       nickName,
       content,
+    }, {
+      params: { giftBoxId }
     });
     return res.data;
   } catch (err) {
@@ -39,10 +41,12 @@ export async function sendGeneralQuestionGift(
   answer: string
 ) {
   try {
-    const res = await api.post(`/api/v1/gift-box/${giftBoxId}/gift/general/question`, {
+    const res = await api.post(`/api/v1/giftletter/question`, {
       nickName,
       question,
       answer,
+    }, {
+      params: { giftBoxId }
     });
     return res.data;
   } catch (err) {
@@ -54,14 +58,14 @@ export async function sendGeneralQuestionGift(
 /**
  * 편지 수정하기 API
  *
- * @param giftId - 선물 ID
+ * @param giftLetterId - 선물편지 ID
  * @param nickName - 발신자 닉네임
  * @param question - 질문 내용 (평문, nullable)
  * @param answer - 평문 편지 답변 내용 (nullable)
  * @param content - 평문 편지 내용 (nullable)
  */
 export async function updateLetter(
-  giftId: string,
+  giftLetterId: string,
   nickName: string,
   question: string | null,
   answer: string | null,
@@ -80,7 +84,7 @@ export async function updateLetter(
       content: content ?? null
     };
 
-    const res = await api.patch(`/api/v1/gift/${giftId}/letter`, requestBody);
+    const res = await api.patch(`/api/v1/giftletter/${giftLetterId}`, requestBody);
     return res.data;
 
   } catch (err) {

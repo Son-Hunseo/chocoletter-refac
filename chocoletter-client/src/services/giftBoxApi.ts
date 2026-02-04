@@ -81,7 +81,9 @@ export async function updateGiftBoxType(type: number) {
  */
 export async function verifyGiftSend(giftBoxId: string) {
   try {
-    const res = await api.get(`/api/v1/gift-box/${giftBoxId}/verify`);
+    const res = await api.get(`/api/v1/giftletter/verify`, {
+      params: { giftBoxId }
+    });
     console.log("선물 전송 여부 확인 성공:", res.data);
     return res.data; // 예: { isSend: boolean }
   } catch (err) {
@@ -94,9 +96,9 @@ export async function verifyGiftSend(giftBoxId: string) {
 /**
  * 선물상자 내가 보낸 선물 확인 API
  * @param giftBoxId 선물상자 ID
- * @returns 
+ * @returns
  * {
-  "giftId": 0,
+  "giftLetterId": 0,
   "type": "FREE",
   "nickName": "string",
   "content": "string",
@@ -106,9 +108,11 @@ export async function verifyGiftSend(giftBoxId: string) {
  */
 export async function getSentLetter(giftBoxId: string) {
   try {
-    const res = await api.get(`/api/v1/gift-box/${giftBoxId}/sent-letter`); // 수정
+    const res = await api.get(`/api/v1/giftletter/sent`, {
+      params: { giftBoxId }
+    });
     // console.log("내가 보낸 선물 확인 성공:", res.data);
-    return res.data; 
+    return res.data;
   } catch (err) {
     console.error("getSentLetter API 호출 중 에러 발생:", err);
     throw err;

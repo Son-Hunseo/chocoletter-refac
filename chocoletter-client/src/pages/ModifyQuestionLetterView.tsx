@@ -17,7 +17,7 @@ import { updateLetter } from "../services/giftEncryptedApi";
 const ModifyQuestionLetterView = () => {
     const [letter, setLetter] = useRecoilState(questionLetterState);
     const [searchParams] = useSearchParams();
-    const giftId = searchParams.get("giftId");
+    const giftLetterId = searchParams.get("giftLetterId");
     const { giftBoxId } = useParams();
     const navigate = useNavigate();
 
@@ -36,7 +36,7 @@ const ModifyQuestionLetterView = () => {
     const handleModify = async () => {
             try {
                 await updateLetter(
-                    giftId as string,
+                    giftLetterId as string,
                     letter.nickname,
                     letter.question,
                     letter.answer,
@@ -44,8 +44,8 @@ const ModifyQuestionLetterView = () => {
             } catch (error: any) {
                 console.error("updateLetter failed:", error);
             }
-    
-            navigate("/sent-gift"); // 전송 완료 화면으로 이동 
+
+            navigate("/sent-gift"); // 전송 완료 화면으로 이동
         }
 
 
