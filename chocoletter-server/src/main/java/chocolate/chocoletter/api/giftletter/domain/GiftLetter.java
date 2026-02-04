@@ -69,8 +69,8 @@ public class GiftLetter extends BaseTimeEntity {
         this.isOpened = false;
     }
 
-    @Builder(builderClassName = "createGeneralGiftLetter", builderMethodName = "createGeneralGiftLetter")
-    public static GiftLetter createGeneralGiftLetter(GiftBox giftBox, Long senderId, Long receiverId,
+    @Builder(builderClassName = "createFreeGiftLetter", builderMethodName = "createFreeGiftLetter")
+    public static GiftLetter createFreeGiftLetter(GiftBox giftBox, Long senderId, Long receiverId,
                                                      String nickname, String content) {
         return new GiftLetter(giftBox, senderId, receiverId, LetterType.FREE, nickname, content, null, null);
     }

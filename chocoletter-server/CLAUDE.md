@@ -33,8 +33,8 @@ The codebase follows a feature-based layered architecture under `src/main/java/c
 ```
 api/
 ├── member/      # User auth (Kakao OAuth2) & profile
-├── giftletter/  # GiftLetter CRUD (consolidated Gift + Letter)
-├── giftbox/     # Gift container per user, gift sending endpoints
+├── giftletter/  # GiftLetter CRUD, 선물 전송/검증
+├── giftbox/     # Gift container per user, 선물함 관리
 └── chatroom/    # Real-time chat between users
 
 common/
@@ -74,26 +74,24 @@ public ResponseEntity<?> getGiftLetter(@DecryptedId @PathVariable Long giftLette
 
 ## API Endpoints
 
+### GiftBox (`/api/v1/gift-box`)
+- `GET /{giftBoxId}` - 친구 선물함 조회
+- `GET /id` - 내 선물함 ID 조회
+- `GET /type` - 선물함 타입 조회
+- `PATCH /type` - 선물함 타입 선택
+- `GET /count` - 내 선물 갯수 조회
+- `PATCH /preview` - 미리보기 카운트 사용
+
 ### GiftLetter (`/api/v1/giftletter`)
 - `GET /all` - 받은 선물 목록 조회
 - `GET /{giftLetterId}/receive` - 받은 선물 상세 조회 (열기)
 - `GET /{giftLetterId}/send` - 보낸 선물 상세 조회
+- `GET /sent?giftBoxId=` - 내가 보낸 선물 조회
+- `POST /free?giftBoxId=` - 자유 선물 전송
+- `POST /question?giftBoxId=` - 질문 선물 전송
 - `PATCH /{giftLetterId}` - 편지 수정
+- `GET /verify?giftBoxId=` - 선물 전송 여부 검증
 - `GET /question` - 랜덤 질문 조회
-
-### GiftBox (`/api/v1/gift-box`)
-- `POST /{giftBoxId}/giftletter/general/free` - 일반 자유 선물 전송
-- `POST /{giftBoxId}/giftletter/general/question` - 일반 질문 선물 전송
-- `POST /{giftBoxId}/giftletter/special/free` - 특별 자유 선물 전송
-- `POST /{giftBoxId}/giftletter/special/question` - 특별 질문 선물 전송
-- `GET /{giftBoxId}/sent-giftletter` - 내가 보낸 선물 조회
-- `GET /{giftBoxId}/verify` - 선물 전송 여부 검증
-- `GET /{giftBoxId}` - 친구 선물함 조회
-- `GET /count` - 내 선물 갯수 조회
-- `GET /id` - 내 선물함 ID 조회
-- `PATCH /preview` - 미리보기 카운트 사용
-- `PATCH /type` - 선물함 타입 선택
-- `GET /type` - 선물함 타입 조회
 
 ### ChatRoom (`/api/v1/chat-room`)
 - `GET /all` - 내 채팅방 목록 조회

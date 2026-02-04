@@ -19,11 +19,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final GiftBoxRepository giftBoxRepository;
 
-    public Member findMember(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.ERR_NOT_FOUND_USER));
-    }
-
     public MyPageResponseDto findMypage(Long memberId) {
         Optional<GiftBox> giftBox = giftBoxRepository.findByMemberId(memberId);
         Optional<Member> member = memberRepository.findById(memberId);

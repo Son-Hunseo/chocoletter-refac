@@ -1,4 +1,4 @@
-package chocolate.chocoletter.api.giftbox.dto.response;
+package chocolate.chocoletter.api.giftletter.dto.response;
 
 public record VerifyIsSendResponseDto(boolean isSend) {
     public static VerifyIsSendResponseDto of(boolean isSend) {
