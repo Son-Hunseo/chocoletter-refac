@@ -4,7 +4,6 @@ import chocolate.chocoletter.api.giftbox.dto.request.GiftBoxTypeRequestDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftCountResponseDto;
 import chocolate.chocoletter.api.giftbox.service.GiftBoxService;
 import chocolate.chocoletter.common.annotation.DecryptedId;
-import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +38,7 @@ public class GiftBoxController implements GiftBoxSwagger {
     }
 
     @PatchMapping("/type")
-    public ResponseEntity<?> chooseGiftBoxType(@RequestBody @Valid GiftBoxTypeRequestDto requestDto,
+    public ResponseEntity<?> chooseGiftBoxType(@RequestBody GiftBoxTypeRequestDto requestDto,
                                                Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
         giftBoxService.chooseGiftBoxType(memberId, requestDto);

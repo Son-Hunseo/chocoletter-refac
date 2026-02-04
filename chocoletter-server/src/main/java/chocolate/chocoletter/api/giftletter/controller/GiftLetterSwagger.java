@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.security.Principal;
@@ -45,7 +46,7 @@ public interface GiftLetterSwagger {
                             schema = @Schema(implementation = FreeGiftLetterRequestDto.class)
                     )
             )
-            @RequestBody FreeGiftLetterRequestDto requestDto,
+            @Valid @RequestBody FreeGiftLetterRequestDto requestDto,
             Principal principal
     );
 
@@ -72,7 +73,7 @@ public interface GiftLetterSwagger {
                             schema = @Schema(implementation = QuestionGiftLetterRequestDto.class)
                     )
             )
-            @RequestBody QuestionGiftLetterRequestDto requestDto,
+            @Valid @RequestBody QuestionGiftLetterRequestDto requestDto,
             Principal principal
     );
 

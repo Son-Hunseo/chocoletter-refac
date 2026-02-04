@@ -72,13 +72,13 @@ public class GiftLetter extends BaseTimeEntity {
     @Builder(builderClassName = "createFreeGiftLetter", builderMethodName = "createFreeGiftLetter")
     public static GiftLetter createFreeGiftLetter(GiftBox giftBox, Long senderId, Long receiverId,
                                                      String nickname, String content) {
-        return new GiftLetter(giftBox, senderId, receiverId, LetterType.FREE, nickname, content, null, null);
+        return new GiftLetter(giftBox, senderId, receiverId, LetterType.free, nickname, content, null, null);
     }
 
     @Builder(builderClassName = "createQuestionGiftLetter", builderMethodName = "createQuestionGiftLetter")
     public static GiftLetter createQuestionGiftLetter(GiftBox giftBox, Long senderId, Long receiverId,
                                                       String nickname, String question, String answer) {
-        return new GiftLetter(giftBox, senderId, receiverId, LetterType.QUESTION, nickname, null, question, answer);
+        return new GiftLetter(giftBox, senderId, receiverId, LetterType.question, nickname, null, question, answer);
     }
 
     public void openGift() {
