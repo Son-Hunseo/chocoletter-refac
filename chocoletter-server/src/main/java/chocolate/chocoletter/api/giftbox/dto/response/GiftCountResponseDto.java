@@ -8,7 +8,7 @@ public record GiftCountResponseDto(Integer giftCount, Integer canOpenGiftCount) 
     public static GiftCountResponseDto of(GiftBox giftBox) {
         return GiftCountResponseDto.builder()
                 .giftCount(giftBox.getGiftCount())
-                .canOpenGiftCount((giftBox.getGeneralGiftCount() / 2))
+                .canOpenGiftCount((giftBox.getGiftCount() / 2))
                 .build();
     }
 }

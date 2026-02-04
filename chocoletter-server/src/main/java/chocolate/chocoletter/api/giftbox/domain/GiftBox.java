@@ -33,16 +33,12 @@ public class GiftBox extends BaseTimeEntity {
     private Integer giftCount;
 
     @Column(nullable = false)
-    private Integer generalGiftCount;
-
-    @Column(nullable = false)
     private Integer type;
 
     @Builder
     public GiftBox(Member member) {
         this.member = member;
         this.giftCount = 0;
-        this.generalGiftCount = 2;
         this.type = 0;
     }
 
@@ -50,12 +46,8 @@ public class GiftBox extends BaseTimeEntity {
         this.giftCount++;
     }
 
-    public void addGeneralGiftCount() {
-        this.generalGiftCount++;
-    }
-
     public void usePreviewCount() {
-        this.generalGiftCount -= 2;
+        this.giftCount -= 2;
     }
 
     public void updateGiftType(int type) {
