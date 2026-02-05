@@ -23,9 +23,6 @@ public interface GiftLetterRepository extends JpaRepository<GiftLetter, Long> {
     @Query("select g from GiftLetter g where g.giftBox.id = :giftBoxId and g.senderId = :senderId")
     Optional<GiftLetter> findByGiftBoxIdAndSenderId(@Param("giftBoxId") Long giftBoxId, @Param("senderId") Long senderId);
 
-    @Query("select g.nickname from GiftLetter g where g.id = :id")
-    String findNicknameById(@Param("id") Long id);
-
     default GiftLetter findByIdOrThrow(Long id) {
         return findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.ERR_NOT_FOUND_GIFT));
