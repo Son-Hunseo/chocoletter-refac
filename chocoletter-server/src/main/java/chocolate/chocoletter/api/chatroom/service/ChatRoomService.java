@@ -7,8 +7,8 @@ import chocolate.chocoletter.api.chatroom.dto.response.ChatRoomsResponseDto;
 import chocolate.chocoletter.api.chatroom.repository.ChatRoomRepository;
 import chocolate.chocoletter.api.giftletter.domain.GiftLetter;
 import chocolate.chocoletter.api.giftletter.dto.response.GiftLetterDetailResponseDto;
+import chocolate.chocoletter.common.event.giftletter.ChatRoomGiftQuery;
 import chocolate.chocoletter.common.event.giftletter.GiftLetterEntityQuery;
-import chocolate.chocoletter.common.event.giftletter.GiftLetterQuery;
 import chocolate.chocoletter.common.util.IdEncryptionUtil;
 import chocolate.chocoletter.common.util.LetterEncryptionUtil;
 import java.util.List;
@@ -31,17 +31,14 @@ public class ChatRoomService {
         List<ChatRoomResponseDto> chatRooms = chatRoomRepository.findMyChatRooms(memberId)
                 .stream()
                 .map(chatRoom -> {
-                    GiftLetterQuery guestQuery = new GiftLetterQuery(chatRoom.getGuestGiftId());
-                    eventPublisher.publishEvent(guestQuery);
-                    Long receiverId = guestQuery.getReceiverId();
-                    String nickname;
-                    if (receiverId.equals(memberId)) {
-                        nickname = guestQuery.getNickname();
-                    } else {
-                        GiftLetterQuery hostQuery = new GiftLetterQuery(chatRoom.getHostGiftId());
-                        eventPublisher.publishEvent(hostQuery);
-                        nickname = hostQuery.getNickname();
-                    }
+                    ChatRoomGiftQuery query = new ChatRoomGiftQuery(
+                            chatRoom.getHostGiftId(), chatRoom.getGuestGiftId());
+                    eventPublisher.publishEvent(query);
+
+                    String nickname = query.getGuestReceiverId().equals(memberId)
+                            ? query.getGuestSenderNickname()
+                            : query.getHostSenderNickname();
+
                     return ChatRoomResponseDto.of(idEncryptionUtil.encrypt(chatRoom.getId()), nickname);
                 })
                 .collect(Collectors.toList());
