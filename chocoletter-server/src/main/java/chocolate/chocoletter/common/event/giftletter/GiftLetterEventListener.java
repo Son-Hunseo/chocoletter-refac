@@ -2,6 +2,10 @@ package chocolate.chocoletter.common.event.giftletter;
 
 import chocolate.chocoletter.api.giftletter.domain.GiftLetter;
 import chocolate.chocoletter.api.giftletter.repository.GiftLetterRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -21,5 +25,23 @@ public class GiftLetterEventListener {
     public void handleGiftLetterEntityQuery(GiftLetterEntityQuery query) {
         GiftLetter giftLetter = giftLetterRepository.findByIdOrThrow(query.getGiftLetterId());
         query.setResult(giftLetter);
+    }
+
+    @EventListener
+    public void handleChatRoomGiftQuery(ChatRoomGiftQuery query) {
+        List<GiftLetter> gifts = giftLetterRepository.findAllById(
+                List.of(query.getHostGiftId(), query.getGuestGiftId()));
+        Map<Long, GiftLetter> giftMap = gifts.stream()
+                .collect(Collectors.toMap(GiftLetter::getId, Function.identity()));
+
+        GiftLetter hostGift = giftMap.get(query.getHostGiftId());
+        GiftLetter guestGift = giftMap.get(query.getGuestGiftId());
+
+        query.setResult(
+                hostGift.getNickname(),
+                guestGift.getNickname(),
+                hostGift.getReceiverId(),
+                guestGift.getReceiverId()
+        );
     }
 }
