@@ -24,12 +24,12 @@ export const GiftList: React.FC = () => {
 	return (
 		<div>
 			{localChocolates.length === 0 ? (
-				<p className="text-sans text-center justify-center mt-[80px]">
+				<p className="text-sans text-center justify-center mt-[100px]">
 					받은 초콜릿이 없어요...
 				</p>
 			) : null}
 			<div
-				className={`w-full grid grid-cols-3 gap-4 overflow-y-auto scrollbar-hidden px-4 py-4 mt-[60px]`}
+				className={`w-full grid grid-cols-3 gap-4 overflow-y-auto scrollbar-hidden px-4 py-4 mt-[90px]`}
 			>
 				{localChocolates.map((chocolate) => (
 					<GiftOpenButton
