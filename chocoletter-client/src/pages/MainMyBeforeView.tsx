@@ -48,8 +48,8 @@ import choco_asset from "../assets/images/main/choco_asset.svg";
 import tool_tip from "../assets/images/main/tool_tip.svg";
 import my_count_background from "../assets/images/main/my_count_background.svg";
 import click_text from "../assets/images/main/click_text.svg";
-import { countMyGiftBox } from "../services/giftBoxApi";
-import { getGiftBoxName } from "../services/giftBoxApi";
+import { countMyGiftBox, getGiftBoxName } from "../services/giftBoxApi";
+import { getGiftLetterCount } from "../services/giftApi";
 
 
 import Loading from "../components/common/Loading";
@@ -203,19 +203,23 @@ const MainMyBeforeView: React.FC = () => {
 
   useEffect(() => {
     async function fetchGiftCount() {
+      if (!urlGiftBoxId) return;
       setIsGiftCountLoading(true);
       try {
-        const { giftCount, canOpenGiftCount } = await countMyGiftBox();
-        setAvailableGifts(canOpenGiftCount);
-        setReceivedGifts(giftCount);
+        const [giftBoxCountRes, giftLetterCount] = await Promise.all([
+          countMyGiftBox(),
+          getGiftLetterCount(urlGiftBoxId)
+        ]);
+        setAvailableGifts(giftBoxCountRes.canOpenGiftCount);
+        setReceivedGifts(giftLetterCount);
       } catch (err) {
-        console.error("Gift Box count API 실패:", err);
+        console.error("Gift count API 실패:", err);
       } finally {
         setIsGiftCountLoading(false);
       }
     }
     fetchGiftCount();
-  }, [setAvailableGifts, setReceivedGifts]);
+  }, [urlGiftBoxId, setAvailableGifts, setReceivedGifts]);
 
 
   return (
