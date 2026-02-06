@@ -7,6 +7,7 @@ import chocolate.chocoletter.api.giftbox.dto.response.GiftBoxResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftBoxTypeResponseDto;
 import chocolate.chocoletter.api.giftbox.dto.response.GiftCountResponseDto;
 import chocolate.chocoletter.api.giftbox.repository.GiftBoxRepository;
+import chocolate.chocoletter.common.event.giftletter.GiftLetterCountQuery;
 import chocolate.chocoletter.common.exception.BadRequestException;
 import chocolate.chocoletter.common.exception.ErrorMessage;
 import chocolate.chocoletter.common.exception.NotFoundException;
@@ -15,6 +16,7 @@ import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class GiftBoxService {
     private final GiftBoxRepository giftBoxRepository;
     private final IdEncryptionUtil idEncryptionUtil;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public GiftBoxResponseDto findFriendGiftBox(Long giftBoxId) {
@@ -31,7 +34,10 @@ public class GiftBoxService {
             throw new NotFoundException(ErrorMessage.ERR_NOT_FOUND_GIFT_BOX);
         }
         String encryptedGiftBoxId = idEncryptionUtil.encrypt(friendGiftBox.getId());
-        return GiftBoxResponseDto.of(friendGiftBox, encryptedGiftBoxId, calcGiftBoxFillLevel(friendGiftBox));
+        GiftLetterCountQuery countQuery = new GiftLetterCountQuery(giftBoxId);
+        eventPublisher.publishEvent(countQuery);
+        Long giftCount = countQuery.getCount() != null ? countQuery.getCount() : 0L;
+        return GiftBoxResponseDto.of(friendGiftBox, encryptedGiftBoxId, calcGiftBoxFillLevel(giftCount));
     }
 
     @Transactional
@@ -70,11 +76,11 @@ public class GiftBoxService {
     }
 
     // 선물함이 채워진 정도를 구별하기 위함 (1단계, 2단계, 3단계 선물함 이미지가 달라짐)
-    public Integer calcGiftBoxFillLevel(GiftBox giftBox) {
-        if (giftBox.getGiftCount() == 0) {
+    public Integer calcGiftBoxFillLevel(Long giftCount) {
+        if (giftCount == 0) {
             return 1;
         }
-        if (1 <= giftBox.getGiftCount() && giftBox.getGiftCount() <= 9) {
+        if (1 <= giftCount && giftCount <= 9) {
             return 2;
         }
         return 3;

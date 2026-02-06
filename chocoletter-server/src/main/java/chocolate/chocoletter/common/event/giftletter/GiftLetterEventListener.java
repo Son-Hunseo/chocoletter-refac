@@ -44,4 +44,16 @@ public class GiftLetterEventListener {
                 guestGift.getReceiverId()
         );
     }
+
+    @EventListener
+    public void handleGiftLetterCountQuery(GiftLetterCountQuery query) {
+        Long count = giftLetterRepository.countByGiftBoxId(query.getGiftBoxId());
+        query.setResult(count);
+    }
+
+    @EventListener
+    public void handleGiftLetterCountByMemberQuery(GiftLetterCountByMemberQuery query) {
+        Long count = giftLetterRepository.countByReceiverId(query.getMemberId());
+        query.setResult(count);
+    }
 }

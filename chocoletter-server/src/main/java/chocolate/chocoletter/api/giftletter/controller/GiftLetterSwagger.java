@@ -238,4 +238,26 @@ public interface GiftLetterSwagger {
                     required = true,
                     example = "1"
             ) @RequestParam @Min(0) @Max(40) Long previousQuestionId);
+
+    @Operation(
+            summary = "특정 선물함의 선물 갯수 조회",
+            description = "특정 GiftBox에 담긴 선물의 갯수를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Long.class)
+                    )
+            )
+    })
+    ResponseEntity<?> countGiftLetterByGiftBoxId(
+            @Parameter(
+                    description = "암호화된 형태의 giftBoxId (String 타입으로 전달)",
+                    schema = @Schema(type = "string")
+            )
+            @RequestParam("giftBoxId") Long giftBoxId
+    );
 }
