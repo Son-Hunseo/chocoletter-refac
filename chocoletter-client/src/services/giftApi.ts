@@ -33,3 +33,12 @@ export async function getMyPageStats() {
     console.log("MyPage stats:", data);
     return data;
 }
+
+// 특정 선물함의 선물 개수 조회
+export async function getGiftLetterCount(giftBoxId: string): Promise<number> {
+  const res = await api.get<number>(`/api/v1/giftletter/count`, {
+    params: { giftBoxId }
+  });
+  console.log("선물 개수 조회 성공:", res.data);
+  return res.data;
+}
