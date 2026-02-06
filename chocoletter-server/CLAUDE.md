@@ -92,6 +92,7 @@ public ResponseEntity<?> getGiftLetter(@DecryptedId @PathVariable Long giftLette
 - `PATCH /{giftLetterId}` - 편지 수정
 - `GET /verify?giftBoxId=` - 선물 전송 여부 검증
 - `GET /question` - 랜덤 질문 조회
+- `GET /count?giftBoxId=` - 특정 선물함의 선물 갯수 조회
 
 ### ChatRoom (`/api/v1/chat-room`)
 - `GET /all` - 내 채팅방 목록 조회

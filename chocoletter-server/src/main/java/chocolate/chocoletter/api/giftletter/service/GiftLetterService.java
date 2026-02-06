@@ -186,6 +186,15 @@ public class GiftLetterService {
 
 
     /**
+     * 특정 선물함의 선물 갯수 조회
+     */
+
+    @Transactional(readOnly = true)
+    public Long countGiftLetterByGiftBoxId(Long giftBoxId) {
+        return giftLetterRepository.countByGiftBoxId(giftBoxId);
+    }
+
+    /**
      * 랜덤 질문 조회
      */
 

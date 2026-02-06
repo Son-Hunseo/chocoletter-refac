@@ -119,4 +119,14 @@ public class GiftLetterController implements GiftLetterSwagger {
         RandomQuestionResponseDto randomQuestion = giftLetterService.findRandomQuestion(previousQuestionId);
         return ResponseEntity.ok(randomQuestion);
     }
+
+    /**
+     * 특정 선물함의 선물 갯수 조회
+     */
+
+    @GetMapping("/count")
+    public ResponseEntity<?> countGiftLetterByGiftBoxId(@DecryptedId @RequestParam("giftBoxId") Long giftBoxId) {
+        Long giftCount = giftLetterService.countGiftLetterByGiftBoxId(giftBoxId);
+        return ResponseEntity.ok(giftCount);
+    }
 }

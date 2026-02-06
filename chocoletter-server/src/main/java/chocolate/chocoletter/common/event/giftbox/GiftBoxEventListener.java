@@ -14,12 +14,6 @@ public class GiftBoxEventListener {
     private final GiftBoxRepository giftBoxRepository;
 
     @EventListener
-    public void handleGiftBoxCountQuery(GiftBoxCountQuery query) {
-        giftBoxRepository.findByMemberId(query.getMemberId())
-                .ifPresent(giftBox -> query.setResult(giftBox.getGiftCount()));
-    }
-
-    @EventListener
     public void handleGiftBoxQuery(GiftBoxQuery query) {
         GiftBox giftBox = giftBoxRepository.findGiftBoxByGiftBoxId(query.getGiftBoxId());
         if (giftBox != null) {

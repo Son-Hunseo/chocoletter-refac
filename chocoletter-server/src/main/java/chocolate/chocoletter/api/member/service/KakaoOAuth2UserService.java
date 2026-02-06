@@ -5,6 +5,7 @@ import chocolate.chocoletter.api.giftbox.repository.GiftBoxRepository;
 import chocolate.chocoletter.api.giftbox.service.GiftBoxService;
 import chocolate.chocoletter.api.member.domain.Member;
 import chocolate.chocoletter.api.member.repository.MemberRepository;
+import chocolate.chocoletter.common.event.giftletter.GiftLetterCountQuery;
 import chocolate.chocoletter.common.util.IdEncryptionUtil;
 import jakarta.transaction.Transactional;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -32,6 +34,7 @@ public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
     private final GiftBoxRepository giftBoxRepository;
     private final IdEncryptionUtil idEncryptionUtil;
     private final GiftBoxService giftBoxService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -67,7 +70,10 @@ public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
             attributes.put("giftBoxId", encryptedGiftBoxId);
             attributes.put("memberId", encryptedMemberId);
             attributes.put("giftBoxType", giftBox.get().getType());
-            attributes.put("giftBoxFillLevel", giftBoxService.calcGiftBoxFillLevel(giftBox.get()));
+            GiftLetterCountQuery countQuery = new GiftLetterCountQuery(giftBoxId);
+            eventPublisher.publishEvent(countQuery);
+            Long giftCount = countQuery.getCount() != null ? countQuery.getCount() : 0L;
+            attributes.put("giftBoxFillLevel", giftBoxService.calcGiftBoxFillLevel(giftCount));
 
             // OAuth2User 객체 생성 및 반환
             return new DefaultOAuth2User(authorities, attributes, "id");
@@ -113,7 +119,7 @@ public class KakaoOAuth2UserService extends DefaultOAuth2UserService {
             attributes.put("giftBoxId", encryptedGiftBoxId);
             attributes.put("memberId", encryptedMemberId);
             attributes.put("giftBoxType", newGiftBox.getType());
-            attributes.put("giftBoxFillLevel", giftBoxService.calcGiftBoxFillLevel(newGiftBox));
+            attributes.put("giftBoxFillLevel", giftBoxService.calcGiftBoxFillLevel(0L));
 
             // OAuth2User 객체 생성 및 반환
             return new DefaultOAuth2User(authorities, attributes, "id");
