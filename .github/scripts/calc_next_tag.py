@@ -6,7 +6,11 @@ data = json.load(sys.stdin)
 
 tags = []
 for d in data:
-    for t in d.get("imageTags") or []:
+    candidates = d.get("imageTags") or []
+    candidates.extend(tag.get("name") for tag in d.get("tags") or [])
+    for t in candidates:
+        if not t:
+            continue
         if re.match(r'^\d+\.\d+$', t):
             tags.append(t)
 
