@@ -61,10 +61,32 @@ jobs:
 
       - name: Update deploy.yaml image tag (before)
         run: |
-          DEPLOY_FILE="chocoletter-client/k8s/resource/deploy.yaml"
-          sed -i -E \
-            "s|(image:[[:space:]]*)${IMAGE_REPOSITORY_BEFORE}:[^[:space:]]+|\\1${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}|" \
-            "${DEPLOY_FILE}"
+          DEPLOY_FILE="chocoletter-client/k8s/kustomization.yaml"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path("chocoletter-client/k8s/kustomization.yaml")
+          target = "chocoletter-client-image"
+          tag = os.environ["NEXT_TAG_BEFORE"]
+          lines = path.read_text().splitlines()
+          in_target = False
+
+          for i, line in enumerate(lines):
+              stripped = line.strip()
+              if stripped == f"- name: {target}":
+                  in_target = True
+                  continue
+              if in_target and stripped.startswith("- name: "):
+                  break
+              if in_target and stripped.startswith("newTag:"):
+                  indent = line[: len(line) - len(line.lstrip())]
+                  lines[i] = f'{indent}newTag: "{tag}"'
+                  path.write_text("\n".join(lines) + "\n")
+                  break
+          else:
+              raise SystemExit(f"newTag for {target} not found in {path}")
+          PY
 
       - name: Calculate next image tag (after)
         id: next_tag_after
@@ -92,15 +114,37 @@ jobs:
 
       - name: Update deploy-after.yaml image tag (after)
         run: |
-          DEPLOY_FILE="chocoletter-client/k8s/resource/deploy-after.yaml"
-          sed -i -E \
-            "s|(image:[[:space:]]*)${IMAGE_REPOSITORY_AFTER}:[^[:space:]]+|\\1${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}|" \
-            "${DEPLOY_FILE}"
+          DEPLOY_FILE="chocoletter-client/k8s/kustomization.yaml"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path("chocoletter-client/k8s/kustomization.yaml")
+          target = "chocoletter-client-after-image"
+          tag = os.environ["NEXT_TAG_AFTER"]
+          lines = path.read_text().splitlines()
+          in_target = False
+
+          for i, line in enumerate(lines):
+              stripped = line.strip()
+              if stripped == f"- name: {target}":
+                  in_target = True
+                  continue
+              if in_target and stripped.startswith("- name: "):
+                  break
+              if in_target and stripped.startswith("newTag:"):
+                  indent = line[: len(line) - len(line.lstrip())]
+                  lines[i] = f'{indent}newTag: "{tag}"'
+                  path.write_text("\n".join(lines) + "\n")
+                  break
+          else:
+              raise SystemExit(f"newTag for {target} not found in {path}")
+          PY
 
       - name: Commit and push
         run: |
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          git add chocoletter-client/k8s/resource/deploy.yaml chocoletter-client/k8s/resource/deploy-after.yaml
+          git add chocoletter-client/k8s/kustomization.yaml
           git commit -m "chore(k8s): bump image tag to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER} [skip ci]" || exit 0
           git push
