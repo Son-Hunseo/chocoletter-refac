@@ -58,7 +58,7 @@ jobs:
 
       - name: Build & Push Docker image
         run: |
-          docker build -t ${IMAGE_NAME}:${NEXT_TAG} ./chocoletter-chat
+          docker build --network host -t ${IMAGE_NAME}:${NEXT_TAG} ./chocoletter-chat
           docker tag ${IMAGE_NAME}:${NEXT_TAG} ${IMAGE_REPOSITORY}:${NEXT_TAG}
           docker push ${IMAGE_REPOSITORY}:${NEXT_TAG}
 

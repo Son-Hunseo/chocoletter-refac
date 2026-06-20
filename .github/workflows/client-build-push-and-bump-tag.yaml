@@ -55,7 +55,7 @@ jobs:
       - name: Build & Push Docker image (before)
         run: |
           IMAGE_NAME="chocoletter-client-image"
-          docker build -t ${IMAGE_NAME}:${NEXT_TAG_BEFORE} -f ./chocoletter-client/Dockerfile ./chocoletter-client
+          docker build --network host -t ${IMAGE_NAME}:${NEXT_TAG_BEFORE} -f ./chocoletter-client/Dockerfile ./chocoletter-client
           docker tag ${IMAGE_NAME}:${NEXT_TAG_BEFORE} ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
           docker push ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
 
@@ -86,7 +86,7 @@ jobs:
       - name: Build & Push Docker image (after)
         run: |
           IMAGE_NAME="chocoletter-client-after-image"
-          docker build -t ${IMAGE_NAME}:${NEXT_TAG_AFTER} -f ./chocoletter-client/Dockerfile.after ./chocoletter-client
+          docker build --network host -t ${IMAGE_NAME}:${NEXT_TAG_AFTER} -f ./chocoletter-client/Dockerfile.after ./chocoletter-client
           docker tag ${IMAGE_NAME}:${NEXT_TAG_AFTER} ${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
           docker push ${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
 
