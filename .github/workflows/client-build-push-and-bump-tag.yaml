@@ -1,4 +1,4 @@
-name: Client - Build & Push to Harbor and Update k8s deploy tag
+name: Client - Build & Push to Harbor and Update GitOps deploy tag
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-push-update:
-    # k8s 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
+    # GitOps 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
     if: github.actor != 'github-actions[bot]'
     runs-on: my-chocoletter-runner
 
@@ -21,6 +21,7 @@ jobs:
       HARBOR_REGISTRY: harbor.onprem.local
       HARBOR_PROJECT: son
       HARBOR_SCHEME: https
+      DEPLOY_FILE: client/kustomization.yaml
 
     steps:
       - name: Checkout
@@ -58,14 +59,20 @@ jobs:
           docker tag ${IMAGE_NAME}:${NEXT_TAG_BEFORE} ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
           docker push ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
 
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v4
+        with:
+          repository: Son-Hunseo/chocoletter-gitops
+          token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
+          path: chocoletter-gitops
+
       - name: Update deploy.yaml image tag (before)
         run: |
-          DEPLOY_FILE="chocoletter-client/k8s/kustomization.yaml"
           python3 - <<'PY'
           import os
           from pathlib import Path
 
-          path = Path("chocoletter-client/k8s/kustomization.yaml")
+          path = Path("chocoletter-gitops") / os.environ["DEPLOY_FILE"]
           target = "chocoletter-client-image"
           tag = os.environ["NEXT_TAG_BEFORE"]
           lines = path.read_text().splitlines()
@@ -112,12 +119,11 @@ jobs:
 
       - name: Update deploy-after.yaml image tag (after)
         run: |
-          DEPLOY_FILE="chocoletter-client/k8s/kustomization.yaml"
           python3 - <<'PY'
           import os
           from pathlib import Path
 
-          path = Path("chocoletter-client/k8s/kustomization.yaml")
+          path = Path("chocoletter-gitops") / os.environ["DEPLOY_FILE"]
           target = "chocoletter-client-after-image"
           tag = os.environ["NEXT_TAG_AFTER"]
           lines = path.read_text().splitlines()
@@ -139,10 +145,11 @@ jobs:
               raise SystemExit(f"newTag for {target} not found in {path}")
           PY
 
-      - name: Commit and push
+      - name: Commit and push GitOps manifest
         run: |
+          cd chocoletter-gitops
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          git add chocoletter-client/k8s/kustomization.yaml
-          git commit -m "chore(k8s): bump image tag to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER} [skip ci]" || exit 0
+          git add "${DEPLOY_FILE}"
+          git commit -m "chore(gitops): bump client image tags to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER}" || exit 0
           git push

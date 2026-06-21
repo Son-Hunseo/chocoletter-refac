@@ -1,4 +1,4 @@
-name: Chat - Build & Push to Harbor and Update k8s deploy tag
+name: Chat - Build & Push to Harbor and Update GitOps deploy tag
 
 on:
   workflow_dispatch:
@@ -13,13 +13,13 @@ permissions:
 
 jobs:
   build-push-update:
-    # k8s 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
+    # GitOps 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
     if: github.actor != 'github-actions[bot]'
     runs-on: my-chocoletter-runner
 
     env:
       IMAGE_NAME: chocoletter-chat-image
-      DEPLOY_FILE: chocoletter-chat/k8s/overlays/prod/kustomization.yaml
+      DEPLOY_FILE: chat/overlays/prod/kustomization.yaml
       HARBOR_REGISTRY: harbor.onprem.local
       HARBOR_PROJECT: son
       HARBOR_REPOSITORY: chocoletter-chat
@@ -61,16 +61,24 @@ jobs:
           docker tag ${IMAGE_NAME}:${NEXT_TAG} ${IMAGE_REPOSITORY}:${NEXT_TAG}
           docker push ${IMAGE_REPOSITORY}:${NEXT_TAG}
 
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v4
+        with:
+          repository: Son-Hunseo/chocoletter-gitops
+          token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
+          path: chocoletter-gitops
+
       - name: Update kustomization.yaml image tag
         run: |
           sed -i -E \
             "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG}\"|" \
-            "${DEPLOY_FILE}"
+            "chocoletter-gitops/${DEPLOY_FILE}"
 
-      - name: Commit and push
+      - name: Commit and push GitOps manifest
         run: |
+          cd chocoletter-gitops
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
           git add "${DEPLOY_FILE}"
-          git commit -m "chore(k8s): bump image tag to ${NEXT_TAG} [skip ci]" || exit 0
+          git commit -m "chore(gitops): bump chat image tag to ${NEXT_TAG}" || exit 0
           git push

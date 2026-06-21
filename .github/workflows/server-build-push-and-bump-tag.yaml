@@ -1,4 +1,4 @@
-name: Server - Build & Push to Harbor and Update k8s deploy tag
+name: Server - Build & Push to Harbor and Update GitOps deploy tag
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-push-update:
-    # k8s 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
+    # GitOps 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
     if: github.actor != 'github-actions[bot]'
     runs-on: my-chocoletter-runner
 
@@ -21,6 +21,8 @@ jobs:
       HARBOR_REGISTRY: harbor.onprem.local
       HARBOR_PROJECT: son
       HARBOR_SCHEME: https
+      DEPLOY_FILE_BEFORE: server/overlays/prod/kustomization.yaml
+      DEPLOY_FILE_AFTER: server/overlays/after/kustomization.yaml
 
     steps:
       - name: Checkout
@@ -58,12 +60,18 @@ jobs:
           docker tag ${IMAGE_NAME}:${NEXT_TAG_BEFORE} ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
           docker push ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
 
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v4
+        with:
+          repository: Son-Hunseo/chocoletter-gitops
+          token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
+          path: chocoletter-gitops
+
       - name: Update kustomization.yaml image tag (before)
         run: |
-          DEPLOY_FILE="chocoletter-server/k8s/overlays/prod/kustomization.yaml"
           sed -i -E \
             "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG_BEFORE}\"|" \
-            "${DEPLOY_FILE}"
+            "chocoletter-gitops/${DEPLOY_FILE_BEFORE}"
 
       - name: Calculate next image tag (after)
         id: next_tag_after
@@ -90,15 +98,15 @@ jobs:
 
       - name: Update kustomization.yaml image tag (after)
         run: |
-          DEPLOY_FILE="chocoletter-server/k8s/overlays/after/kustomization.yaml"
           sed -i -E \
             "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG_AFTER}\"|" \
-            "${DEPLOY_FILE}"
+            "chocoletter-gitops/${DEPLOY_FILE_AFTER}"
 
-      - name: Commit and push
+      - name: Commit and push GitOps manifest
         run: |
+          cd chocoletter-gitops
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          git add chocoletter-server/k8s/overlays/prod/kustomization.yaml chocoletter-server/k8s/overlays/after/kustomization.yaml
-          git commit -m "chore(k8s): bump image tag to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER} [skip ci]" || exit 0
+          git add "${DEPLOY_FILE_BEFORE}" "${DEPLOY_FILE_AFTER}"
+          git commit -m "chore(gitops): bump server image tags to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER}" || exit 0
           git push
