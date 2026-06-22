@@ -21,8 +21,8 @@ jobs:
       HARBOR_REGISTRY: harbor.onprem.local
       HARBOR_PROJECT: son
       HARBOR_SCHEME: https
-      DEPLOY_FILE_BEFORE: client/overlays/prod/kustomization.yaml
-      DEPLOY_FILE_AFTER: client/overlays/after/kustomization.yaml
+      DEPLOY_FILE_BEFORE: client/overlays/onprem/prod/kustomization.yaml
+      DEPLOY_FILE_AFTER: client/overlays/onprem/after/kustomization.yaml
 
     steps:
       - name: Checkout
