@@ -21,7 +21,8 @@ jobs:
       HARBOR_REGISTRY: harbor.onprem.local
       HARBOR_PROJECT: son
       HARBOR_SCHEME: https
-      DEPLOY_FILE: client/kustomization.yaml
+      DEPLOY_FILE_BEFORE: client/overlays/prod/kustomization.yaml
+      DEPLOY_FILE_AFTER: client/overlays/after/kustomization.yaml
 
     steps:
       - name: Checkout
@@ -66,13 +67,13 @@ jobs:
           token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
           path: chocoletter-gitops
 
-      - name: Update deploy.yaml image tag (before)
+      - name: Update prod kustomization.yaml image tag
         run: |
           python3 - <<'PY'
           import os
           from pathlib import Path
 
-          path = Path("chocoletter-gitops") / os.environ["DEPLOY_FILE"]
+          path = Path("chocoletter-gitops") / os.environ["DEPLOY_FILE_BEFORE"]
           target = "chocoletter-client-image"
           tag = os.environ["NEXT_TAG_BEFORE"]
           lines = path.read_text().splitlines()
@@ -117,14 +118,14 @@ jobs:
           docker tag ${IMAGE_NAME}:${NEXT_TAG_AFTER} ${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
           docker push ${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
 
-      - name: Update deploy-after.yaml image tag (after)
+      - name: Update after kustomization.yaml image tag
         run: |
           python3 - <<'PY'
           import os
           from pathlib import Path
 
-          path = Path("chocoletter-gitops") / os.environ["DEPLOY_FILE"]
-          target = "chocoletter-client-after-image"
+          path = Path("chocoletter-gitops") / os.environ["DEPLOY_FILE_AFTER"]
+          target = "chocoletter-client-image"
           tag = os.environ["NEXT_TAG_AFTER"]
           lines = path.read_text().splitlines()
           in_target = False
@@ -150,6 +151,6 @@ jobs:
           cd chocoletter-gitops
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
-          git add "${DEPLOY_FILE}"
+          git add "${DEPLOY_FILE_BEFORE}" "${DEPLOY_FILE_AFTER}"
           git commit -m "chore(gitops): bump client image tags to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER}" || exit 0
           git push
