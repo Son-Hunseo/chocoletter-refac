@@ -1,4 +1,4 @@
-name: Chat - Build & Push to Harbor and Update GitOps deploy tag
+name: Chat - Build & Push and Update GitOps deploy tag
 
 on:
   workflow_dispatch:
@@ -10,11 +10,11 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
-  build-push-update:
-    # GitOps 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
-    if: github.actor != 'github-actions[bot]'
+  deploy-onprem:
+    if: ${{ (vars.ENABLE_ONPREM || 'false') == 'true' && github.actor != 'github-actions[bot]' }}
     runs-on: my-chocoletter-runner
 
     env:
@@ -38,28 +38,22 @@ jobs:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
-          echo "${HARBOR_PASSWORD}" | docker login "${HARBOR_REGISTRY}" \
-            --username "${HARBOR_USERNAME}" \
-            --password-stdin
+          echo "${HARBOR_PASSWORD}" | docker login "${HARBOR_REGISTRY}"             --username "${HARBOR_USERNAME}"             --password-stdin
 
       - name: Calculate next image tag
-        id: next_tag
         env:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
-          JSON="$(curl -kfsSL \
-            -u "${HARBOR_USERNAME}:${HARBOR_PASSWORD}" \
-            "${HARBOR_SCHEME}://${HARBOR_REGISTRY}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${HARBOR_REPOSITORY}/artifacts?page_size=100")"
-          
+          JSON="$(curl -kfsSL             -u "${HARBOR_USERNAME}:${HARBOR_PASSWORD}"             "${HARBOR_SCHEME}://${HARBOR_REGISTRY}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${HARBOR_REPOSITORY}/artifacts?page_size=100")"
           NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
           echo "NEXT_TAG=${NEXT_TAG}" >> $GITHUB_ENV
 
-      - name: Build & Push Docker image
+      - name: Build and push Docker image
         run: |
-          docker build --network host -t ${IMAGE_NAME}:${NEXT_TAG} ./chocoletter-chat
-          docker tag ${IMAGE_NAME}:${NEXT_TAG} ${IMAGE_REPOSITORY}:${NEXT_TAG}
-          docker push ${IMAGE_REPOSITORY}:${NEXT_TAG}
+          docker build --network host -t "${IMAGE_NAME}:${NEXT_TAG}" ./chocoletter-chat
+          docker tag "${IMAGE_NAME}:${NEXT_TAG}" "${IMAGE_REPOSITORY}:${NEXT_TAG}"
+          docker push "${IMAGE_REPOSITORY}:${NEXT_TAG}"
 
       - name: Checkout GitOps repository
         uses: actions/checkout@v4
@@ -68,11 +62,9 @@ jobs:
           token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
           path: chocoletter-gitops
 
-      - name: Update kustomization.yaml image tag
+      - name: Update kustomization image
         run: |
-          sed -i -E \
-            "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG}\"|" \
-            "chocoletter-gitops/${DEPLOY_FILE}"
+          python3 .github/scripts/update_kustomize_image.py             "chocoletter-gitops/${DEPLOY_FILE}"             --image "${IMAGE_NAME}"             --new-name "${IMAGE_REPOSITORY}"             --new-tag "${NEXT_TAG}"
 
       - name: Commit and push GitOps manifest
         run: |
@@ -81,4 +73,64 @@ jobs:
           git config user.email github-actions[bot]@users.noreply.github.com
           git add "${DEPLOY_FILE}"
           git commit -m "chore(gitops): bump chat image tag to ${NEXT_TAG}" || exit 0
+          git push
+
+  deploy-aws:
+    if: ${{ (vars.ENABLE_AWS || 'true') == 'true' && github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ap-northeast-2
+      IMAGE_NAME: chocoletter-chat-image
+      DEPLOY_FILE: chat/overlays/aws/prod/kustomization.yaml
+      ECR_REPOSITORY: chocoletter-chat
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ECR_PUSH_ROLE_ARN }}
+
+      - name: Login to Amazon ECR
+        id: ecr_login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image env
+        run: |
+          echo "IMAGE_REPOSITORY=${{ steps.ecr_login.outputs.registry }}/${ECR_REPOSITORY}" >> $GITHUB_ENV
+
+      - name: Calculate next image tag
+        run: |
+          JSON="$(aws ecr describe-images             --region "${AWS_REGION}"             --repository-name "${ECR_REPOSITORY}"             --query 'imageDetails[].imageTags[]'             --output json 2>/dev/null || echo '[]')"
+          NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
+          echo "NEXT_TAG=${NEXT_TAG}" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        run: |
+          docker build --network host -t "${IMAGE_NAME}:${NEXT_TAG}" ./chocoletter-chat
+          docker tag "${IMAGE_NAME}:${NEXT_TAG}" "${IMAGE_REPOSITORY}:${NEXT_TAG}"
+          docker push "${IMAGE_REPOSITORY}:${NEXT_TAG}"
+
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v4
+        with:
+          repository: Son-Hunseo/chocoletter-gitops
+          token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
+          path: chocoletter-gitops
+
+      - name: Update AWS kustomization image
+        run: |
+          python3 .github/scripts/update_kustomize_image.py             "chocoletter-gitops/${DEPLOY_FILE}"             --image "${IMAGE_NAME}"             --new-name "${IMAGE_REPOSITORY}"             --new-tag "${NEXT_TAG}"
+
+      - name: Commit and push GitOps manifest
+        run: |
+          cd chocoletter-gitops
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+          git add "${DEPLOY_FILE}"
+          git commit -m "chore(gitops): bump AWS chat image tag to ${NEXT_TAG}" || exit 0
           git push

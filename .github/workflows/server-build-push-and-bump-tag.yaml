@@ -1,4 +1,4 @@
-name: Server - Build & Push to Harbor and Update GitOps deploy tag
+name: Server - Build & Push and Update GitOps deploy tag
 
 on:
   workflow_dispatch:
@@ -10,11 +10,11 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
-  build-push-update:
-    # GitOps 리소스 푸시로 다시 재귀적으로 트리거되어 무한으로 호출되는 것을 막음
-    if: github.actor != 'github-actions[bot]'
+  deploy-onprem:
+    if: ${{ (vars.ENABLE_ONPREM || 'false') == 'true' && github.actor != 'github-actions[bot]' }}
     runs-on: my-chocoletter-runner
 
     env:
@@ -33,32 +33,25 @@ jobs:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
-          echo "${HARBOR_PASSWORD}" | docker login "${HARBOR_REGISTRY}" \
-            --username "${HARBOR_USERNAME}" \
-            --password-stdin
+          echo "${HARBOR_PASSWORD}" | docker login "${HARBOR_REGISTRY}"             --username "${HARBOR_USERNAME}"             --password-stdin
 
       - name: Calculate next image tag (before)
-        id: next_tag_before
         env:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
           HARBOR_REPOSITORY="chocoletter-server"
           IMAGE_REPOSITORY="${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${HARBOR_REPOSITORY}"
-          JSON="$(curl -kfsSL \
-            -u "${HARBOR_USERNAME}:${HARBOR_PASSWORD}" \
-            "${HARBOR_SCHEME}://${HARBOR_REGISTRY}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${HARBOR_REPOSITORY}/artifacts?page_size=100")"
-
+          JSON="$(curl -kfsSL             -u "${HARBOR_USERNAME}:${HARBOR_PASSWORD}"             "${HARBOR_SCHEME}://${HARBOR_REGISTRY}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${HARBOR_REPOSITORY}/artifacts?page_size=100")"
           NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
           echo "NEXT_TAG_BEFORE=${NEXT_TAG}" >> $GITHUB_ENV
           echo "IMAGE_REPOSITORY_BEFORE=${IMAGE_REPOSITORY}" >> $GITHUB_ENV
 
-      - name: Build & Push Docker image (before)
+      - name: Build and push Docker image (before)
         run: |
-          IMAGE_NAME="chocoletter-server-image"
-          docker build --network host -t ${IMAGE_NAME}:${NEXT_TAG_BEFORE} -f ./chocoletter-server/Dockerfile ./chocoletter-server
-          docker tag ${IMAGE_NAME}:${NEXT_TAG_BEFORE} ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
-          docker push ${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}
+          docker build --network host -t "chocoletter-server-image:${NEXT_TAG_BEFORE}" -f ./chocoletter-server/Dockerfile ./chocoletter-server
+          docker tag "chocoletter-server-image:${NEXT_TAG_BEFORE}" "${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}"
+          docker push "${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}"
 
       - name: Checkout GitOps repository
         uses: actions/checkout@v4
@@ -67,40 +60,31 @@ jobs:
           token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
           path: chocoletter-gitops
 
-      - name: Update kustomization.yaml image tag (before)
+      - name: Update prod kustomization image
         run: |
-          sed -i -E \
-            "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG_BEFORE}\"|" \
-            "chocoletter-gitops/${DEPLOY_FILE_BEFORE}"
+          python3 .github/scripts/update_kustomize_image.py             "chocoletter-gitops/${DEPLOY_FILE_BEFORE}"             --image "chocoletter-server-image"             --new-name "${IMAGE_REPOSITORY_BEFORE}"             --new-tag "${NEXT_TAG_BEFORE}"
 
       - name: Calculate next image tag (after)
-        id: next_tag_after
         env:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
           HARBOR_REPOSITORY="chocoletter-server-after"
           IMAGE_REPOSITORY="${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${HARBOR_REPOSITORY}"
-          JSON="$(curl -kfsSL \
-            -u "${HARBOR_USERNAME}:${HARBOR_PASSWORD}" \
-            "${HARBOR_SCHEME}://${HARBOR_REGISTRY}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${HARBOR_REPOSITORY}/artifacts?page_size=100")"
-
+          JSON="$(curl -kfsSL             -u "${HARBOR_USERNAME}:${HARBOR_PASSWORD}"             "${HARBOR_SCHEME}://${HARBOR_REGISTRY}/api/v2.0/projects/${HARBOR_PROJECT}/repositories/${HARBOR_REPOSITORY}/artifacts?page_size=100")"
           NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
           echo "NEXT_TAG_AFTER=${NEXT_TAG}" >> $GITHUB_ENV
           echo "IMAGE_REPOSITORY_AFTER=${IMAGE_REPOSITORY}" >> $GITHUB_ENV
 
-      - name: Build & Push Docker image (after)
+      - name: Build and push Docker image (after)
         run: |
-          IMAGE_NAME="chocoletter-server-after-image"
-          docker build --network host -t ${IMAGE_NAME}:${NEXT_TAG_AFTER} -f ./chocoletter-server/Dockerfile.after ./chocoletter-server
-          docker tag ${IMAGE_NAME}:${NEXT_TAG_AFTER} ${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
-          docker push ${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}
+          docker build --network host -t "chocoletter-server-after-image:${NEXT_TAG_AFTER}" -f ./chocoletter-server/Dockerfile.after ./chocoletter-server
+          docker tag "chocoletter-server-after-image:${NEXT_TAG_AFTER}" "${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}"
+          docker push "${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}"
 
-      - name: Update kustomization.yaml image tag (after)
+      - name: Update after kustomization image
         run: |
-          sed -i -E \
-            "s|(^[[:space:]]*newTag:[[:space:]]*).*$|\1\"${NEXT_TAG_AFTER}\"|" \
-            "chocoletter-gitops/${DEPLOY_FILE_AFTER}"
+          python3 .github/scripts/update_kustomize_image.py             "chocoletter-gitops/${DEPLOY_FILE_AFTER}"             --image "chocoletter-server-image"             --new-name "${IMAGE_REPOSITORY_AFTER}"             --new-tag "${NEXT_TAG_AFTER}"
 
       - name: Commit and push GitOps manifest
         run: |
@@ -109,4 +93,81 @@ jobs:
           git config user.email github-actions[bot]@users.noreply.github.com
           git add "${DEPLOY_FILE_BEFORE}" "${DEPLOY_FILE_AFTER}"
           git commit -m "chore(gitops): bump server image tags to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER}" || exit 0
+          git push
+
+  deploy-aws:
+    if: ${{ (vars.ENABLE_AWS || 'true') == 'true' && github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ap-northeast-2
+      DEPLOY_FILE_BEFORE: server/overlays/aws/prod/kustomization.yaml
+      DEPLOY_FILE_AFTER: server/overlays/aws/after/kustomization.yaml
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ECR_PUSH_ROLE_ARN }}
+
+      - name: Login to Amazon ECR
+        id: ecr_login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Calculate next image tag (before)
+        run: |
+          ECR_REPOSITORY="chocoletter-server"
+          IMAGE_REPOSITORY="${{ steps.ecr_login.outputs.registry }}/${ECR_REPOSITORY}"
+          JSON="$(aws ecr describe-images             --region "${AWS_REGION}"             --repository-name "${ECR_REPOSITORY}"             --query 'imageDetails[].imageTags[]'             --output json 2>/dev/null || echo '[]')"
+          NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
+          echo "NEXT_TAG_BEFORE=${NEXT_TAG}" >> $GITHUB_ENV
+          echo "IMAGE_REPOSITORY_BEFORE=${IMAGE_REPOSITORY}" >> $GITHUB_ENV
+
+      - name: Build and push Docker image (before)
+        run: |
+          docker build --network host -t "chocoletter-server-image:${NEXT_TAG_BEFORE}" -f ./chocoletter-server/Dockerfile ./chocoletter-server
+          docker tag "chocoletter-server-image:${NEXT_TAG_BEFORE}" "${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}"
+          docker push "${IMAGE_REPOSITORY_BEFORE}:${NEXT_TAG_BEFORE}"
+
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v4
+        with:
+          repository: Son-Hunseo/chocoletter-gitops
+          token: ${{ secrets.CHOCOLETTER_GITOPS_TOKEN }}
+          path: chocoletter-gitops
+
+      - name: Update prod kustomization image
+        run: |
+          python3 .github/scripts/update_kustomize_image.py             "chocoletter-gitops/${DEPLOY_FILE_BEFORE}"             --image "chocoletter-server-image"             --new-name "${IMAGE_REPOSITORY_BEFORE}"             --new-tag "${NEXT_TAG_BEFORE}"
+
+      - name: Calculate next image tag (after)
+        run: |
+          ECR_REPOSITORY="chocoletter-server-after"
+          IMAGE_REPOSITORY="${{ steps.ecr_login.outputs.registry }}/${ECR_REPOSITORY}"
+          JSON="$(aws ecr describe-images             --region "${AWS_REGION}"             --repository-name "${ECR_REPOSITORY}"             --query 'imageDetails[].imageTags[]'             --output json 2>/dev/null || echo '[]')"
+          NEXT_TAG="$(echo "$JSON" | python3 .github/scripts/calc_next_tag.py)"
+          echo "NEXT_TAG_AFTER=${NEXT_TAG}" >> $GITHUB_ENV
+          echo "IMAGE_REPOSITORY_AFTER=${IMAGE_REPOSITORY}" >> $GITHUB_ENV
+
+      - name: Build and push Docker image (after)
+        run: |
+          docker build --network host -t "chocoletter-server-after-image:${NEXT_TAG_AFTER}" -f ./chocoletter-server/Dockerfile.after ./chocoletter-server
+          docker tag "chocoletter-server-after-image:${NEXT_TAG_AFTER}" "${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}"
+          docker push "${IMAGE_REPOSITORY_AFTER}:${NEXT_TAG_AFTER}"
+
+      - name: Update after kustomization image
+        run: |
+          python3 .github/scripts/update_kustomize_image.py             "chocoletter-gitops/${DEPLOY_FILE_AFTER}"             --image "chocoletter-server-image"             --new-name "${IMAGE_REPOSITORY_AFTER}"             --new-tag "${NEXT_TAG_AFTER}"
+
+      - name: Commit and push GitOps manifest
+        run: |
+          cd chocoletter-gitops
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+          git add "${DEPLOY_FILE_BEFORE}" "${DEPLOY_FILE_AFTER}"
+          git commit -m "chore(gitops): bump AWS server image tags to before:${NEXT_TAG_BEFORE}, after:${NEXT_TAG_AFTER}" || exit 0
           git push
